@@ -60,9 +60,7 @@
             }
           }
         },
-        "tags": [
-          "Todo"
-        ]
+        "tags": ["Todo"]
       },
       "post": {
         "summary": "Create a new todo",
@@ -114,22 +112,17 @@
             }
           }
         },
-        "tags": [
-          "Todo"
-        ]
+        "tags": ["Todo"]
       }
     },
-    "/weather/latlon={coords}": {
-      "x-zuplo-path": {
-        "pathMode": "open-api"
-      },
+    "/weather/": {
       "get": {
         "summary": "Transform weather coordinates",
-        "description": "**Intercepts a latlon string**, rounds the decimals to 3 places, and rewrites the request to the destination weather service.",
+        "description": "**Intercepts a latlon query parameter**, rounds the decimals to 3 places, and rewrites the request to the destination weather service.",
         "parameters": [
           {
-            "name": "coords",
-            "in": "path",
+            "name": "latlon",
+            "in": "query",
             "required": true,
             "schema": {
               "type": "string"
@@ -145,22 +138,15 @@
         "operationId": "transform-weather-request",
         "x-zuplo-route": {
           "corsPolicy": "none",
+          "policies": {
+            "inbound": ["weather-normalize-cache-key", "weather-cache-inbound"]
+          },
           "handler": {
             "export": "default",
-            "module": "$import(./modules/weather-transform.ts)"
+            "module": "$import(./modules/weather-transform)"
           }
         },
-        "tags": [
-          "Weather"
-        ],
-        "additionalOperationContext": {
-          "oasFilePath": "/config/routes.oas.json",
-          "method": "get",
-          "path": "/weather/latlon={coords}",
-          "pathZuploConfig": {
-            "pathMode": "open-api"
-          }
-        }
+        "tags": ["Weather"]
       }
     },
     "/todos/{id}": {
@@ -228,9 +214,7 @@
             }
           }
         },
-        "tags": [
-          "Todo"
-        ]
+        "tags": ["Todo"]
       },
       "delete": {
         "summary": "Delete a todo",
@@ -265,9 +249,7 @@
             }
           }
         },
-        "tags": [
-          "Todo"
-        ]
+        "tags": ["Todo"]
       }
     }
   },
@@ -293,12 +275,7 @@
             "description": "The user ID who owns the todo"
           }
         },
-        "required": [
-          "id",
-          "title",
-          "completed",
-          "userId"
-        ]
+        "required": ["id", "title", "completed", "userId"]
       },
       "CreateTodo": {
         "type": "object",
@@ -317,10 +294,7 @@
             "description": "The user ID who owns the todo"
           }
         },
-        "required": [
-          "title",
-          "userId"
-        ]
+        "required": ["title", "userId"]
       },
       "UpdateTodo": {
         "type": "object",

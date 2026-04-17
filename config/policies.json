@@ -1,6 +1,27 @@
 {
   "policies": [
     {
+      "name": "weather-normalize-cache-key",
+      "policyType": "custom-code-inbound",
+      "handler": {
+        "export": "default",
+        "module": "$import(./modules/weather-normalize-cache-key)",
+        "options": {}
+      }
+    },
+    {
+      "name": "weather-cache-inbound",
+      "policyType": "caching-inbound",
+      "handler": {
+        "export": "CachingInboundPolicy",
+        "module": "$import(@zuplo/runtime)",
+        "options": {
+          "expirationSecondsTtl": 3600,
+          "statusCodes": [200]
+        }
+      }
+    },
+    {
       "handler": {
         "export": "MockApiInboundPolicy",
         "module": "$import(@zuplo/runtime)",
