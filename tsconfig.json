@@ -1,5 +1,5 @@
 {
-  "include": ["modules/**/*", ".zuplo/**/*", "tests/**/*"],
+  "include": ["modules/**/*", "data/**/*", ".zuplo/**/*", "tests/**/*"],
   "exclude": ["./node_modules", "./dist"],
   "compilerOptions": {
     "module": "ESNext",
@@ -12,6 +12,7 @@
     "importHelpers": true,
     "removeComments": true,
     "esModuleInterop": true,
+    "resolveJsonModule": true,
     "noEmit": true,
     "strictNullChecks": true,
     "experimentalDecorators": true

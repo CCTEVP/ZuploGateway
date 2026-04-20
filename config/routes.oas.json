@@ -118,16 +118,34 @@
     "/weather/": {
       "get": {
         "summary": "Transform weather coordinates",
-        "description": "**Intercepts a latlon query parameter**, rounds the decimals to 3 places, and rewrites the request to the destination weather service.",
+        "description": "**Intercepts a latlon or player query parameter**, resolves coordinates, rounds them to 3 places, and rewrites the request to the destination weather service.",
         "parameters": [
           {
             "name": "latlon",
             "in": "query",
-            "required": true,
+            "required": false,
             "schema": {
               "type": "string"
             },
-            "description": "The raw comma-separated coordinates (e.g., 32.46564,12.8737874)"
+            "description": "The raw comma-separated coordinates (e.g., 32.46564,12.8737874). Optional when player is provided."
+          },
+          {
+            "name": "player",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "A Broadsign player ID resolved to latitude and longitude from the bundled player dataset. Optional when latlon is provided."
+          },
+          {
+            "name": "com.broadsign.suite.bsp.resource_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "An alias of player that resolves the same Broadsign player ID to latitude and longitude from the CSV dataset. Optional when latlon or player is provided."
           }
         ],
         "responses": {

@@ -31,6 +31,11 @@ PowerShell launcher, which closes the previous listeners before starting npm:
 .\start-dev.ps1
 ```
 
+Player lookup data for the weather route is stored directly in
+`data/player-location-data.json` and is imported by the runtime without any
+sync or generation step. The file is a flat list of player-to-coordinate rows
+so it stays easy to edit directly locally or in the Zuplo editor.
+
 You can start editing the API by modifying `config/routes.oas.json`. The dev
 server will automatically reload the API with your changes.
 

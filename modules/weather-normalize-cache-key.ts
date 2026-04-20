@@ -1,8 +1,31 @@
 import { ZuploContext, ZuploRequest } from "@zuplo/runtime";
+import { findPlayerLocation } from "./player-location-data";
 
 export default async function (request: ZuploRequest, _context: ZuploContext) {
   const url = new URL(request.url);
+  const player = url.searchParams.get("player")?.trim();
+  const resourceId = url.searchParams
+    .get("com.broadsign.suite.bsp.resource_id")
+    ?.trim();
   const latlon = url.searchParams.get("latlon");
+  const locationLookupValue = player || resourceId;
+
+  if (locationLookupValue) {
+    const match = findPlayerLocation(locationLookupValue);
+
+    if (!match) {
+      return request;
+    }
+
+    url.searchParams.set(
+      "latlon",
+      `${match.latitude.toFixed(3)},${match.longitude.toFixed(3)}`,
+    );
+    url.searchParams.delete("player");
+    url.searchParams.delete("com.broadsign.suite.bsp.resource_id");
+
+    return new ZuploRequest(url, request);
+  }
 
   if (!latlon) {
     return request;
@@ -23,6 +46,8 @@ export default async function (request: ZuploRequest, _context: ZuploContext) {
     "latlon",
     `${parseFloat(rawLat).toFixed(3)},${parseFloat(rawLon).toFixed(3)}`,
   );
+  url.searchParams.delete("player");
+  url.searchParams.delete("com.broadsign.suite.bsp.resource_id");
 
   return new ZuploRequest(url, request);
 }

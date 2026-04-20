@@ -4,6 +4,7 @@ import {
   ZuploContext,
   ZuploRequest,
 } from "@zuplo/runtime";
+import { findPlayerLocation } from "./player-location-data";
 
 export default async function (request: ZuploRequest, context: ZuploContext) {
   const openWeatherApiKey = environment.OPENWEATHER_API_KEY;
@@ -15,13 +16,35 @@ export default async function (request: ZuploRequest, context: ZuploContext) {
   }
 
   const url = new URL(request.url);
+  let latlon = url.searchParams.get("latlon");
+  const player = url.searchParams.get("player")?.trim();
+  const resourceId = url.searchParams
+    .get("com.broadsign.suite.bsp.resource_id")
+    ?.trim();
+  const locationLookupValue = player || resourceId;
 
-  const latlon = url.searchParams.get("latlon");
+  if (!latlon && locationLookupValue) {
+    const match = findPlayerLocation(locationLookupValue);
+
+    if (!match) {
+      return new Response(
+        `Unknown player query parameter: ${locationLookupValue}`,
+        {
+          status: 404,
+        },
+      );
+    }
+
+    latlon = `${match.latitude},${match.longitude}`;
+  }
 
   if (!latlon) {
-    return new Response("Missing required query parameter: latlon", {
-      status: 400,
-    });
+    return new Response(
+      "Missing required query parameter: latlon, player, or com.broadsign.suite.bsp.resource_id",
+      {
+        status: 400,
+      },
+    );
   }
 
   const cleanCoords = latlon.trim();
