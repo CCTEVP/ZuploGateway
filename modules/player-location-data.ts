@@ -1,4 +1,4 @@
-import playerLocationRecords from "./player-location-data.json";
+import playerLocationRecords from "../config/player-location-data.json";
 
 export type PlayerLocationRecord = {
   playerId: string;

@@ -32,7 +32,7 @@ PowerShell launcher, which closes the previous listeners before starting npm:
 ```
 
 Player lookup data for the weather route is stored directly in
-`modules/player-location-data.json` and is imported by the runtime without any
+`config/player-location-data.json` and is imported by the runtime without any
 sync or generation step. The file is a flat list of player-to-coordinate rows
 so it stays easy to edit directly locally or in the Zuplo editor.
 
