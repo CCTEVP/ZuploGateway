@@ -5,15 +5,15 @@ import {
   ZuploRequest,
 } from "@zuplo/runtime";
 
-const openWeatherApiKey = environment.OPENWEATHER_API_KEY;
-
-if (!openWeatherApiKey) {
-  throw new ConfigurationError(
-    "OPENWEATHER_API_KEY environment variable isn't configured",
-  );
-}
-
 export default async function (request: ZuploRequest, context: ZuploContext) {
+  const openWeatherApiKey = environment.OPENWEATHER_API_KEY;
+
+  if (!openWeatherApiKey) {
+    throw new ConfigurationError(
+      "OPENWEATHER_API_KEY environment variable isn't configured",
+    );
+  }
+
   const url = new URL(request.url);
 
   const latlon = url.searchParams.get("latlon");
