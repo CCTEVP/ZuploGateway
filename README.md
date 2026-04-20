@@ -32,15 +32,15 @@ PowerShell launcher, which closes the previous listeners before starting npm:
 ```
 
 Player lookup data for the weather route is stored directly in
-`config/player-location-data.json` and is imported by the runtime without any
-sync or generation step. The file is a flat list of player-to-coordinate rows
-so it stays easy to edit directly locally or in the Zuplo editor.
+`modules/player-location-data.ts` in the raw Broadsign record format so it can
+be updated directly in the Zuplo editor.
 
 The `/weather/` endpoint also supports an optional `debug=true|false` query
 parameter. When `debug=true`, the response includes a `debug` object with an
 `original` field containing the upstream OpenWeather URL, but with the `appid`
-value masked with `*` characters before it is returned. Otherwise the `debug`
-object is omitted.
+value masked with `*` characters before it is returned. When the request uses a
+`player` or `com.broadsign.suite.bsp.resource_id`, the matched raw player data
+is also included under `debug.player`. Otherwise the `debug` object is omitted.
 
 You can start editing the API by modifying `config/routes.oas.json`. The dev
 server will automatically reload the API with your changes.

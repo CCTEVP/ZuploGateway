@@ -1,7 +1,10 @@
 import { ZuploContext, ZuploRequest } from "@zuplo/runtime";
-import { findPlayerLocation } from "./player-location-data";
+import {
+  findPlayerLocation,
+  findPlayerLocationSourceRecord,
+} from "./player-location-data";
 
-export default async function (request: ZuploRequest, _context: ZuploContext) {
+export default async function (request: ZuploRequest, context: ZuploContext) {
   const url = new URL(request.url);
   const player = url.searchParams.get("player")?.trim();
   const resourceId = url.searchParams
@@ -12,10 +15,13 @@ export default async function (request: ZuploRequest, _context: ZuploContext) {
 
   if (locationLookupValue) {
     const match = findPlayerLocation(locationLookupValue);
+    const sourceRecord = findPlayerLocationSourceRecord(locationLookupValue);
 
     if (!match) {
       return request;
     }
+
+    context.custom.weatherMatchedSourceRecord = sourceRecord;
 
     url.searchParams.set(
       "latlon",

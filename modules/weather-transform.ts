@@ -4,7 +4,10 @@ import {
   ZuploContext,
   ZuploRequest,
 } from "@zuplo/runtime";
-import { findPlayerLocation } from "./player-location-data";
+import {
+  findPlayerLocation,
+  findPlayerLocationSourceRecord,
+} from "./player-location-data";
 
 function maskValue(value: string) {
   return "*".repeat(value.length);
@@ -27,10 +30,16 @@ export default async function (request: ZuploRequest, context: ZuploContext) {
     .get("com.broadsign.suite.bsp.resource_id")
     ?.trim();
   const locationLookupValue = player || resourceId;
-  const showOriginal = debug === "true";
+  const showDebug = debug === "true";
+  const matchedSourceRecord = (context.custom.weatherMatchedSourceRecord ??
+    (locationLookupValue
+      ? findPlayerLocationSourceRecord(locationLookupValue)
+      : undefined)) as ReturnType<typeof findPlayerLocationSourceRecord>;
 
   if (!latlon && locationLookupValue) {
-    const match = findPlayerLocation(locationLookupValue);
+    const match = matchedSourceRecord
+      ? findPlayerLocation(locationLookupValue)
+      : undefined;
 
     if (!match) {
       return new Response(
@@ -85,7 +94,7 @@ export default async function (request: ZuploRequest, context: ZuploContext) {
   const headers = new Headers(upstreamResponse.headers);
   const originalUrl = new URL(newUrl);
 
-  if (showOriginal) {
+  if (showDebug) {
     originalUrl.searchParams.set("appid", maskValue(openWeatherApiKey));
   }
 
@@ -94,10 +103,11 @@ export default async function (request: ZuploRequest, context: ZuploContext) {
     timestamp: timestamp
       ? new Date(timestamp).toISOString()
       : new Date().toISOString(),
-    ...(showOriginal
+    ...(showDebug
       ? {
           debug: {
             original: originalUrl.toString(),
+            ...(matchedSourceRecord ? { player: matchedSourceRecord } : {}),
           },
         }
       : {}),
