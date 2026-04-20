@@ -18,6 +18,19 @@ pnpm dev
 Open [http://localhost:9000](http://localhost:9000) with your browser to see the
 result.
 
+If you also want the docs server locally, run:
+
+```bash
+npm run docs
+```
+
+If port `9000` or `9100` is already in use, you can start the gateway with the
+PowerShell launcher, which closes the previous listeners before starting npm:
+
+```powershell
+.\start-dev.ps1
+```
+
 You can start editing the API by modifying `config/routes.oas.json`. The dev
 server will automatically reload the API with your changes.
 

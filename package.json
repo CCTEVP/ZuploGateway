@@ -4,7 +4,7 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "dev": "zuplo dev",
+    "dev": "zuplo dev --port 9000 --editor-port 9100 --no-start-docs",
     "test": "zuplo test",
     "docs": "zuplo docs"
   },
