@@ -1,8 +1,16 @@
-import { ZuploContext, ZuploRequest } from "@zuplo/runtime";
+import { ZuploContext, ZuploRequest, ZoneCache } from "@zuplo/runtime";
 import {
   findPlayerLocation,
   findPlayerLocationSourceRecord,
 } from "./player-location-data";
+
+const WEATHER_CACHE_NAMESPACE = "weather-cache";
+const WEATHER_CACHE_VERSION_KEY = "version";
+
+async function getWeatherCacheVersion(context: ZuploContext) {
+  const cache = new ZoneCache<string>(WEATHER_CACHE_NAMESPACE, context);
+  return (await cache.get(WEATHER_CACHE_VERSION_KEY)) ?? "0";
+}
 
 export default async function (request: ZuploRequest, context: ZuploContext) {
   const url = new URL(request.url);
@@ -12,6 +20,7 @@ export default async function (request: ZuploRequest, context: ZuploContext) {
     ?.trim();
   const latlon = url.searchParams.get("latlon");
   const locationLookupValue = player || resourceId;
+  const cacheVersion = await getWeatherCacheVersion(context);
 
   if (locationLookupValue) {
     const match = findPlayerLocation(locationLookupValue);
@@ -27,6 +36,7 @@ export default async function (request: ZuploRequest, context: ZuploContext) {
       "latlon",
       `${match.latitude.toFixed(3)},${match.longitude.toFixed(3)}`,
     );
+    url.searchParams.set("cacheVersion", cacheVersion);
     url.searchParams.delete("player");
     url.searchParams.delete("com.broadsign.suite.bsp.resource_id");
 
@@ -52,6 +62,7 @@ export default async function (request: ZuploRequest, context: ZuploContext) {
     "latlon",
     `${parseFloat(rawLat).toFixed(3)},${parseFloat(rawLon).toFixed(3)}`,
   );
+  url.searchParams.set("cacheVersion", cacheVersion);
   url.searchParams.delete("player");
   url.searchParams.delete("com.broadsign.suite.bsp.resource_id");
 

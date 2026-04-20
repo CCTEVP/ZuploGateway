@@ -42,6 +42,10 @@ value masked with `*` characters before it is returned. When the request uses a
 `player` or `com.broadsign.suite.bsp.resource_id`, the matched raw player data
 is also included under `debug.player`. Otherwise the `debug` object is omitted.
 
+To invalidate the weather cache on demand, send a `POST` request to
+`/weather/reset`. This bumps the internal cache version so subsequent weather
+requests bypass previously cached entries.
+
 You can start editing the API by modifying `config/routes.oas.json`. The dev
 server will automatically reload the API with your changes.
 

@@ -5,6 +5,26 @@
     "title": "My Zuplo API"
   },
   "paths": {
+    "/weather/reset": {
+      "post": {
+        "summary": "Reset weather cache",
+        "description": "Invalidates the weather cache by bumping the internal cache version used in weather request cache keys.",
+        "responses": {
+          "200": {
+            "description": "Weather cache reset successfully"
+          }
+        },
+        "operationId": "reset-weather-cache",
+        "x-zuplo-route": {
+          "corsPolicy": "none",
+          "handler": {
+            "export": "default",
+            "module": "$import(./modules/weather-reset)"
+          }
+        },
+        "tags": ["Weather"]
+      }
+    },
     "/weather/": {
       "get": {
         "summary": "Transform weather coordinates",
