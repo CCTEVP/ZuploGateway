@@ -66,6 +66,16 @@
               "enum": ["true", "false"]
             },
             "description": "Optional debug flag. When set to true, the response includes a debug object with the original upstream OpenWeather URL, with the appid value masked. When false or omitted, debug is hidden."
+          },
+          {
+            "name": "format",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["json"]
+            },
+            "description": "Optional response format. By default, /weather returns JavaScript as data = {...};. Use format=json to return raw JSON."
           }
         ],
         "responses": {

@@ -25,12 +25,24 @@ export default async function (request: ZuploRequest, context: ZuploContext) {
   const url = new URL(request.url);
   let latlon = url.searchParams.get("latlon");
   const debug = url.searchParams.get("debug");
+  const format = url.searchParams.get("format")?.toLowerCase();
   const player = url.searchParams.get("player")?.trim();
   const resourceId = url.searchParams
     .get("com.broadsign.suite.bsp.resource_id")
     ?.trim();
   const locationLookupValue = player || resourceId;
   const showDebug = debug === "true";
+  const returnJson = format === "json";
+
+  if (format && !returnJson) {
+    return new Response(
+      "Invalid format query parameter. The only supported value is format=json.",
+      {
+        status: 400,
+      },
+    );
+  }
+
   const matchedSourceRecord = (context.custom.weatherMatchedSourceRecord ??
     (locationLookupValue
       ? findPlayerLocationSourceRecord(locationLookupValue)
@@ -113,10 +125,19 @@ export default async function (request: ZuploRequest, context: ZuploContext) {
       : {}),
   };
 
-  headers.set("content-type", "application/json; charset=utf-8");
+  const responseBody = returnJson
+    ? JSON.stringify(payload)
+    : `data = ${JSON.stringify(payload)};`;
+
+  headers.set(
+    "content-type",
+    returnJson
+      ? "application/json; charset=utf-8"
+      : "application/javascript; charset=utf-8",
+  );
   headers.delete("content-length");
 
-  return Response.json(payload, {
+  return new Response(responseBody, {
     status: upstreamResponse.status,
     statusText: upstreamResponse.statusText,
     headers,
