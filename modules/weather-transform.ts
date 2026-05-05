@@ -8,9 +8,17 @@ import {
   findPlayerLocation,
   findPlayerLocationSourceRecord,
 } from "./player-location-data";
+import {
+  applyConfiguredResponseFilter,
+  getEndpointNameFromPath,
+} from "./response-filter";
 
 function maskValue(value: string) {
   return "*".repeat(value.length);
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
 export default async function (request: ZuploRequest, context: ZuploContext) {
@@ -125,9 +133,25 @@ export default async function (request: ZuploRequest, context: ZuploContext) {
       : {}),
   };
 
+  const endpointName = getEndpointNameFromPath(url.pathname);
+  const filteredPayload = applyConfiguredResponseFilter(endpointName, payload);
+  const responsePayload: Record<string, unknown> = isRecord(filteredPayload)
+    ? filteredPayload
+    : {};
+
+  // Timestamp is always present regardless of show/hide config.
+  responsePayload.timestamp = payload.timestamp;
+
+  // Debug visibility is controlled only by the debug query parameter.
+  if (showDebug && payload.debug !== undefined) {
+    responsePayload.debug = payload.debug;
+  } else {
+    delete responsePayload.debug;
+  }
+
   const responseBody = returnJson
-    ? JSON.stringify(payload)
-    : `data = ${JSON.stringify(payload)};`;
+    ? JSON.stringify(responsePayload)
+    : `data = ${JSON.stringify(responsePayload)};`;
 
   headers.set(
     "content-type",
