@@ -189,7 +189,7 @@ const playerLocationRecords: PlayerLocationSourceRecord[] = [
     Address: "Birger Jarlsgatan 43 plan 6",
   },
   {
-    BroadsignPlayerID: 0,
+    BroadsignPlayerID: 981242176,
     DisplayUnitsID: 254,
     BroadsignDisplayUnitID: 1138827361,
     FrameID: 1138827363,
