@@ -21,6 +21,20 @@ export type PlayerLocationRecord = {
 
 const playerLocationRecords: PlayerLocationSourceRecord[] = [
   {
+    BroadsignPlayerID: 582309742,
+    DisplayUnitsID: 254,
+    BroadsignDisplayUnitID: 561903922,
+    FrameID: 561903926,
+    PanelsID: 151905,
+    IDSFaceID: 42053,
+    Latitude: 56.67625994,
+    Longitude: 12.85745516,
+    Country: "Sweden",
+    Municipality: "Halmstad",
+    NameStreet: "Lilla torg",
+    Address: "Lilla torg",
+  },
+  {
     BroadsignPlayerID: 616575581,
     DisplayUnitsID: 254,
     BroadsignDisplayUnitID: 561903922,
