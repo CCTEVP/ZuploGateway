@@ -1,153 +1,70 @@
 ---
-description: Welcome to your new Zudoku documentation site.
-sidebar_label: My Developer Portal
-sidebar_icon: panel-top
+description: Overview of the Zuplo weather gateway service.
+sidebar_label: Service Overview
+sidebar_icon: cloud
 category: ""
 ---
 
-<div>
-  <img src="/banner.svg" className="dark:hidden" />
-  <img src="/banner-dark.svg" className="hidden dark:block" />
-</div>
+# Zuplo Weather Gateway
 
-# Welcome to Better API Documentation
+This service provides two weather-focused endpoints:
 
-Welcome to your new developer portal that makes sense. 🎉
+- GET /weather/
+- POST /weather/reset
 
-This is your new developer portal, built with ["Zudoku by Zuplo"](https://github.com/zuplo/zudoku)
-and designed to elevate your API documentation experience. We've streamlined the setup process so
-you can focus on what matters most: creating exceptional developer experiences.
+The API reference page is generated from the OpenAPI file and remains the source of truth for route
+shape and examples.
 
-Think of this as your API's professional showcase—presenting your endpoints and documentation in the
-best possible light. Whether you're launching innovative new features or improving existing
-services, this portal provides the foundation for clear, accessible, and engaging developer
-documentation.
+## GET /weather/
 
-Let's explore what we've configured for you and how you can customize it to perfectly match your
-needs.
+Resolves coordinates, calls OpenWeather, and returns a transformed response.
 
-## Let's Review Your Configuration
+### Query Parameters
 
-The developer portal is configured in the `zudoku.config.tsx` file. We've created a starter
-configuration to get you up and running quickly. Let's walk you through everything we've set up so
-you know how to customize it:
+- latlon: Comma-separated coordinates, for example 32.46564,12.8737874
+- player: Player ID resolved from the bundled player-location dataset
+- com.broadsign.suite.bsp.resource_id: Alias for player
+- debug: true or false. When true, adds a debug object to the response.
+- filter: false disables response filtering and returns the full upstream payload.
+- format: json returns JSON. Default response is JavaScript in the form data = {...};
 
-<Stepper>
+### Behavior Notes
 
-1. **Change the Basics**
+- One of latlon, player, or com.broadsign.suite.bsp.resource_id is required.
+- Latitude and longitude are normalized to 3 decimal places before upstream request.
+- Response filtering is enabled by default.
+- timestamp is always included.
+- debug visibility is controlled only by debug=true.
+- When debug=true, debug.original contains the upstream URL with appid masked.
 
-   First, you may want to change the title and banner we've put in place. These are part of the
-   `page` section in your configuration.
+### Common Errors
 
-   :::tip
+- 400 for missing or invalid query parameters.
+- 404 when player or resource_id cannot be resolved.
 
-   **Have a company logo?** Learn how you can
-   [add your logo](https://zuplo.com/docs/dev-portal/zudoku/configuration/site#logo) in our
-   documentation.
+## POST /weather/reset
 
-   :::
+Invalidates weather cache namespace by bumping the internal cache version key.
 
-   ```jsx
-   {
-    // ...
-    "page": {
-      "title": "My Developer Portal",
-      "banner": {
-        "message": (
-          <div className="w-full text-center">
-            <strong>Congrats!</strong> 🙌 You just created your first developer
-            portal.
-          </div>
-        ),
-        "color": "info",
-        "dismissible": true,
-      }
-   }
-   ```
+- Method: POST
+- Path: /weather/reset
+- Success response: 200
 
-1. **API Reference**
+## Local Testing Examples
 
-   Your [API Reference](/api) is generated from your Zuplo OpenAPI file in `../routes.oas.json`—you
-   can add other APIs whenever you need them. Improve your documentation by adding more details to
-   the OpenAPI file.
+```bash
+# Default JavaScript response with filter enabled
+GET /weather/?latlon=32.46564,12.8737874
 
-   ```json
-   {
-     // ...
-     "apis": {
-       "type": "file",
-       "input": "../config/routes.oas.json",
-       "navigationId": "api"
-     }
-   }
-   ```
+# Raw JSON response
+GET /weather/?latlon=32.46564,12.8737874&format=json
 
-1. **Authentication & Login**
+# Return full upstream payload (filter disabled)
+GET /weather/?latlon=32.46564,12.8737874&filter=false&format=json
 
-   We've configured your project to use [Auth0](https://auth0.com) as an authentication provider
-   with our demo account. We support many authentication providers—check the
-   [documentation on how to configure](https://zuplo.com/docs/dev-portal/zudoku/configuration/authentication#authentication-providers)
-   each one.
+# Include debug metadata
+GET /weather/?player=YOUR_PLAYER_ID&debug=true&format=json
 
-   :::caution
-
-   You must change the authentication provider before taking this to **production**. Using our demo
-   provider is not secure for production use.
-
-   :::
-
-   ```json
-   {
-     // ...
-     "authentication": {
-       "type": "auth0",
-       "domain": "auth.zuplo.io",
-       "clientId": "kWQs12Q9Og4w6zzI82qJSa3klN1sMtvz",
-       "audience": "https://api.example.com/"
-     }
-   }
-   ```
-
-1. **API Keys**
-
-   We've enabled API Keys on your developer portal. This connects to the API Key Service in Zuplo.
-   To add API Keys for your users, create a consumer with the matching email address in **Services
-   => API Key Service** in Zuplo, or
-   [create a Consumer using the Zuplo API](https://zuplo.com/docs/api/api-keys-consumers#creates-a-consumer).
-
-   ```json
-   {
-     // ...
-     "apiKeys": {
-       "enabled": true
-     }
-   }
-   ```
-
-</Stepper>
-
-## Make It Yours
-
-You can customize the look and feel of your documentation site by modifying the `theme` section in
-`zudoku.config.tsx`. Why not try changing the primary color of your site?
-
-```json
-{
-  // ...
-  "theme": {
-    "light": {
-      "primary": "316 100% 50%",
-      "primaryForeground": "360 100% 100%"
-    },
-    "dark": {
-      "primary": "316 100% 50%",
-      "primaryForeground": "360 100% 100%"
-    }
-  }
-  // ...
-}
+# Reset cache
+POST /weather/reset
 ```
-
-We have extensive customization options available. From colors to fonts and borders, find the
-[full list of options](https://zuplo.com/docs/dev-portal/zudoku/customization/colors-theme) in our
-documentation.

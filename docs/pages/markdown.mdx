@@ -1,108 +1,66 @@
-# Welcome to Our Documentation
+# Weather Endpoint Quick Reference
 
-## Overview
+Use this page for copy-paste request patterns and expected response shape.
 
-This page demonstrates various markdown features and formatting options available in our
-documentation system. Whether you're writing technical documentation, guides, or tutorials, these
-examples will help you create beautiful and well-structured content.
+## Request Patterns
 
-### Key Features
+```http
+GET /weather/?latlon=32.46564,12.8737874
+```
 
-- **Rich Text Formatting**: Bold, italic, and code formatting
-- **Lists**: Ordered and unordered lists
-- **Code Blocks**: Syntax highlighting for multiple languages
-- **Tables**: Organized data presentation
-- **Images**: Visual content integration
-- **Links**: Internal and external references
+```http
+GET /weather/?player=123456&format=json
+```
 
-## Text Formatting
+```http
+GET /weather/?com.broadsign.suite.bsp.resource_id=123456&format=json
+```
 
-You can make text **bold** or _italic_ to emphasize important points. For technical terms, use
-`inline code` formatting.
+```http
+GET /weather/?latlon=32.46564,12.8737874&debug=true&format=json
+```
 
-### Code Examples
+```http
+GET /weather/?latlon=32.46564,12.8737874&filter=false&format=json
+```
 
-Here's a simple JavaScript function:
+```http
+POST /weather/reset
+```
+
+## Response Format
+
+Default response is JavaScript:
 
 ```javascript
-function greet(name) {
-  return `Hello, ${name}!`;
+data = { ...payload };
+```
+
+With format=json:
+
+```json
+{
+  "coord": { "lon": 12.874, "lat": 32.466 },
+  "main": { "temp": 19.7 },
+  "weather": [{ "main": "Clouds" }],
+  "wind": { "speed": 3.6 },
+  "rain": { "1h": 0.12 },
+  "timestamp": "2026-05-19T11:18:22.000Z"
 }
-
-// Example usage
-console.log(greet("World"));
 ```
 
-And here's a Python example:
+## Filtering Rules
 
-```python
-def calculate_fibonacci(n):
-    if n <= 1:
-        return n
-    return calculate_fibonacci(n-1) + calculate_fibonacci(n-2)
+- By default, weather payload is filtered.
+- Set filter=false to return the full upstream payload.
+- timestamp is always returned.
+- debug is only returned when debug=true.
 
-# Print first 10 Fibonacci numbers
-for i in range(10):
-    print(calculate_fibonacci(i))
-```
+## Status Codes
 
-## Lists and Organization
-
-### Unordered Lists
-
-- First item
-- Second item
-  - Nested item
-  - Another nested item
-- Third item
-
-### Ordered Lists
-
-1. First step
-2. Second step
-   1. Sub-step A
-   2. Sub-step B
-3. Third step
-
-## Tables
-
-| Feature     | Description           | Status |
-| ----------- | --------------------- | ------ |
-| Markdown    | Basic text formatting | ✅     |
-| Code Blocks | Syntax highlighting   | ✅     |
-| Tables      | Data organization     | ✅     |
-| Images      | Visual content        | ✅     |
-
-## Blockquotes
-
-> "The best way to predict the future is to implement it."
->
-> — Alan Kay
-
-## Links and References
-
-- [Internal Link](#overview)
-- [External Link](https://example.com)
-- [Documentation Home](/)
-
-## Horizontal Rules
-
----
-
-## Additional Tips
-
-1. Use headings to create a clear hierarchy
-2. Keep paragraphs short and focused
-3. Include code examples when relevant
-4. Use lists for better readability
-5. Add tables for structured data
-
-## Conclusion
-
-This example demonstrates the power and flexibility of markdown for creating beautiful
-documentation. Feel free to use these patterns in your own documentation to maintain consistency and
-readability.
-
----
-
-_Last updated: March 2024_
+| Endpoint            | Status | Meaning                             |
+| ------------------- | ------ | ----------------------------------- |
+| GET /weather/       | 200    | Success                             |
+| GET /weather/       | 400    | Missing or invalid query parameters |
+| GET /weather/       | 404    | Unknown player or resource_id       |
+| POST /weather/reset | 200    | Cache version bumped                |

@@ -42,6 +42,11 @@ value masked with `*` characters before it is returned. When the request uses a
 `player` or `com.broadsign.suite.bsp.resource_id`, the matched raw player data
 is also included under `debug.player`. Otherwise the `debug` object is omitted.
 
+The `/weather/` endpoint applies response filtering by default. To bypass the
+filter and return the full upstream weather payload, set `filter=false`.
+`timestamp` and `debug` are still controlled independently (`timestamp` is
+always present, and `debug` is still controlled by `debug=true`).
+
 By default, `/weather/` responds as JavaScript in the form
 `data = { ...current payload... };`. If you prefer raw JSON, use the optional
 query parameter `format=json`.

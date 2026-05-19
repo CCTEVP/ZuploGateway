@@ -15,6 +15,7 @@ Accepted query parameters:
 - `player`: Player ID resolved from the bundled player-location dataset
 - `com.broadsign.suite.bsp.resource_id`: Alias for `player`
 - `debug`: `true` or `false` (when `true`, includes debug metadata)
+- `filter`: `false` (when set, bypasses the response filter and returns the full upstream weather payload)
 - `format`: `json` (otherwise returns JavaScript: `data = {...};`)
 
 Behavior:
@@ -23,7 +24,9 @@ Behavior:
   `com.broadsign.suite.bsp.resource_id`
 - Rounds latitude/longitude to 3 decimal places before upstream request
 - Applies inbound weather caching (`3600` seconds for HTTP `200` responses)
+- Applies response filtering by default unless `filter=false`
 - Adds `timestamp` to the response payload
+- Keeps `timestamp` and `debug` independent of filtering (`timestamp` always included, `debug` controlled by `debug=true`)
 
 Common responses:
 

@@ -1,6 +1,6 @@
 const responseFilterConfig = {
   weather: {
-    show: ["coord", "main.temp", "weather[0].main", "wind.speed", "rain.1hr"],
+    show: ["coord", "main.temp", "weather[0].main", "wind.speed", "rain.1h"],
     hide: [],
   },
 };

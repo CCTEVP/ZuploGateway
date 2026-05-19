@@ -33,6 +33,7 @@ export default async function (request: ZuploRequest, context: ZuploContext) {
   const url = new URL(request.url);
   let latlon = url.searchParams.get("latlon");
   const debug = url.searchParams.get("debug");
+  const filter = url.searchParams.get("filter")?.toLowerCase();
   const format = url.searchParams.get("format")?.toLowerCase();
   const player = url.searchParams.get("player")?.trim();
   const resourceId = url.searchParams
@@ -41,6 +42,7 @@ export default async function (request: ZuploRequest, context: ZuploContext) {
   const locationLookupValue = player || resourceId;
   const showDebug = debug === "true";
   const returnJson = format === "json";
+  const shouldApplyFilter = filter !== "false";
 
   if (format && !returnJson) {
     return new Response(
@@ -134,9 +136,11 @@ export default async function (request: ZuploRequest, context: ZuploContext) {
   };
 
   const endpointName = getEndpointNameFromPath(url.pathname);
-  const filteredPayload = applyConfiguredResponseFilter(endpointName, payload);
-  const responsePayload: Record<string, unknown> = isRecord(filteredPayload)
-    ? filteredPayload
+  const sourcePayload = shouldApplyFilter
+    ? applyConfiguredResponseFilter(endpointName, payload)
+    : structuredClone(payload);
+  const responsePayload: Record<string, unknown> = isRecord(sourcePayload)
+    ? sourcePayload
     : {};
 
   // Timestamp is always present regardless of show/hide config.
