@@ -21,6 +21,20 @@ export type PlayerLocationRecord = {
 
 const playerLocationRecords: PlayerLocationSourceRecord[] = [
   {
+    BroadsignPlayerID: 759244535,
+    DisplayUnitsID: 255,
+    BroadsignDisplayUnitID: 561903924,
+    FrameID: 561903926,
+    PanelsID: 151905,
+    IDSFaceID: 42053,
+    Latitude: 40.4332154,
+    Longitude: -3.5558364,
+    Country: "Spain",
+    Municipality: "Coslada",
+    NameStreet: "Fuentemar",
+    Address: "Fuentemar 21",
+  },
+  {
     BroadsignPlayerID: 582309742,
     DisplayUnitsID: 254,
     BroadsignDisplayUnitID: 561903922,
