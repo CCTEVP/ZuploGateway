@@ -10,7 +10,10 @@ export type AvinorFlight = {
   domInt?: string;
   scheduleTime?: string;
   arrDep?: string;
+  /** Counterpart airport IATA (origin for arrivals, destination for departures). */
   airport?: string;
+  /** City/airport display name for `airport`, from Avinor airportNames. */
+  airportName?: string;
   viaAirport?: string;
   checkIn?: string;
   gate?: string;
@@ -26,10 +29,15 @@ export type AvinorFeedResult = {
 };
 
 const AVINOR_XML_FEED_BASE = "https://asrv.avinor.no/XmlFeed/v1.0";
+const AVINOR_AIRPORT_NAMES_URL = "https://asrv.avinor.no/airportNames/v1.0";
 const DEFAULT_AIRPORT = "OSL";
 const DEFAULT_DIRECTION = "D";
 const DEFAULT_TIME_FROM = "1";
 const DEFAULT_TIME_TO = "7";
+
+let airportNameCache: Record<string, string> | undefined;
+let airportNameCacheLoadedAt = 0;
+const AIRPORT_NAME_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
 
 export type AvinorFeedOptions = {
   airport?: string;
@@ -62,7 +70,9 @@ function parseFlightElement(flightXml: string): AvinorFlight {
     viaAirport: getElementText(flightXml, "via_airport"),
     checkIn: getElementText(flightXml, "check_in"),
     gate: getElementText(flightXml, "gate"),
-    beltNumber: getElementText(flightXml, "belt_number"),
+    beltNumber:
+      getElementText(flightXml, "belt") ||
+      getElementText(flightXml, "belt_number"),
     delayed: getElementText(flightXml, "delayed"),
     status: statusMatch
       ? {
@@ -111,6 +121,55 @@ export function buildAvinorFeedUrl(options: AvinorFeedOptions = {}): URL {
   return url;
 }
 
+function parseAirportNamesXml(xml: string): Record<string, string> {
+  const names: Record<string, string> = {};
+  const matches = xml.match(/<airportName\b[^/]*\/?>/gi) ?? [];
+
+  for (const tag of matches) {
+    const code = getAttribute(tag, "code")?.toUpperCase();
+    const name =
+      getAttribute(tag, "shortname8") ||
+      getAttribute(tag, "name") ||
+      getAttribute(tag, "shortname15");
+    if (code && name) {
+      names[code] = name;
+    }
+  }
+
+  return names;
+}
+
+export async function getAvinorAirportNames(): Promise<Record<string, string>> {
+  const now = Date.now();
+  if (
+    airportNameCache &&
+    now - airportNameCacheLoadedAt < AIRPORT_NAME_CACHE_TTL_MS
+  ) {
+    return airportNameCache;
+  }
+
+  const response = await fetch(AVINOR_AIRPORT_NAMES_URL);
+  if (!response.ok) {
+    return airportNameCache ?? {};
+  }
+
+  const xml = await response.text();
+  airportNameCache = parseAirportNamesXml(xml);
+  airportNameCacheLoadedAt = now;
+  return airportNameCache;
+}
+
+export function enrichFlightsWithAirportNames(
+  flights: AvinorFlight[],
+  airportNames: Record<string, string>,
+): AvinorFlight[] {
+  return flights.map((flight) => {
+    const code = flight.airport?.toUpperCase();
+    const airportName = code ? airportNames[code] : undefined;
+    return airportName ? { ...flight, airportName } : flight;
+  });
+}
+
 export async function fetchAvinorFlights(
   options: AvinorFeedOptions = {},
 ): Promise<{
@@ -121,9 +180,13 @@ export async function fetchAvinorFlights(
   feed: AvinorFeedResult;
 }> {
   const url = buildAvinorFeedUrl(options);
-  const response = await fetch(url.toString());
+  const [response, airportNames] = await Promise.all([
+    fetch(url.toString()),
+    getAvinorAirportNames(),
+  ]);
   const xml = await response.text();
   const feed = parseAvinorXmlFeed(xml);
+  feed.flights = enrichFlightsWithAirportNames(feed.flights, airportNames);
 
   return {
     url,

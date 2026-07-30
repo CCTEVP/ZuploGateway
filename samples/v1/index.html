@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=1080, height=1920, initial-scale=1, maximum-scale=1"
+    />
+    <title>Next Arrival</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Source+Sans+3:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg-0: #0b1220;
+        --bg-1: #132038;
+        --ink: #f4f7fb;
+        --muted: #9db0c9;
+        --accent: #3dd6c6;
+        --warn: #f0b429;
+        --line: rgba(244, 247, 251, 0.12);
+        --panel: rgba(19, 32, 56, 0.72);
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      html,
+      body {
+        width: 1080px;
+        height: 1920px;
+        overflow: hidden;
+        background: var(--bg-0);
+        color: var(--ink);
+        font-family: "Source Sans 3", "Segoe UI", sans-serif;
+      }
+
+      body {
+        background:
+          radial-gradient(ellipse 90% 50% at 50% -10%, #1d3a5c 0%, transparent 55%),
+          linear-gradient(180deg, var(--bg-1) 0%, var(--bg-0) 42%, #070b14 100%);
+      }
+
+      .board {
+        width: 1080px;
+        height: 1920px;
+        padding: 72px 64px 56px;
+        display: grid;
+        grid-template-rows: auto auto 1fr auto auto;
+        gap: 36px;
+      }
+
+      .eyebrow {
+        font-family: "Barlow Condensed", sans-serif;
+        font-size: 42px;
+        font-weight: 600;
+        letter-spacing: 0.28em;
+        text-transform: uppercase;
+        color: var(--accent);
+        opacity: 0;
+        animation: rise 700ms ease-out 120ms forwards;
+      }
+
+      h1 {
+        font-family: "Barlow Condensed", sans-serif;
+        font-size: 120px;
+        font-weight: 700;
+        line-height: 0.92;
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
+        opacity: 0;
+        animation: rise 800ms ease-out 220ms forwards;
+      }
+
+      .meta-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        gap: 24px;
+        padding-bottom: 28px;
+        border-bottom: 1px solid var(--line);
+        opacity: 0;
+        animation: rise 800ms ease-out 320ms forwards;
+      }
+
+      .meta-label {
+        font-size: 28px;
+        color: var(--muted);
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .meta-value {
+        font-family: "Barlow Condensed", sans-serif;
+        font-size: 56px;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+      }
+
+      .card {
+        align-self: stretch;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 48px;
+        padding: 64px 56px;
+        border: 1px solid var(--line);
+        background: var(--panel);
+        backdrop-filter: blur(8px);
+        opacity: 0;
+        transform: translateY(24px);
+        animation: rise 900ms ease-out 420ms forwards;
+      }
+
+      .flight-id {
+        font-family: "Barlow Condensed", sans-serif;
+        font-size: 140px;
+        font-weight: 700;
+        line-height: 0.9;
+        letter-spacing: 0.01em;
+      }
+
+      .city {
+        font-family: "Barlow Condensed", sans-serif;
+        font-size: 96px;
+        font-weight: 600;
+        line-height: 1;
+        letter-spacing: 0.02em;
+      }
+
+      .city-code {
+        margin-top: 12px;
+        font-size: 32px;
+        color: var(--muted);
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+      }
+
+      .detail-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 40px 32px;
+      }
+
+      .detail.span-2 {
+        grid-column: 1 / -1;
+      }
+
+      .detail dt {
+        font-size: 26px;
+        color: var(--muted);
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        margin-bottom: 10px;
+      }
+
+      .detail dd {
+        font-family: "Barlow Condensed", sans-serif;
+        font-size: 72px;
+        font-weight: 600;
+        line-height: 1;
+      }
+
+      .status {
+        display: inline-flex;
+        align-items: center;
+        gap: 16px;
+        font-family: "Barlow Condensed", sans-serif;
+        font-size: 64px;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+
+      .status::before {
+        content: "";
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background: var(--accent);
+        box-shadow: 0 0 0 8px rgba(61, 214, 198, 0.15);
+      }
+
+      .status.is-delayed::before,
+      .status.is-new-time::before {
+        background: var(--warn);
+        box-shadow: 0 0 0 8px rgba(240, 180, 41, 0.18);
+      }
+
+      .status.is-cancelled::before {
+        background: #ef5b5b;
+        box-shadow: 0 0 0 8px rgba(239, 91, 91, 0.18);
+      }
+
+      .empty,
+      .error {
+        font-family: "Barlow Condensed", sans-serif;
+        font-size: 64px;
+        font-weight: 600;
+        line-height: 1.15;
+        color: var(--muted);
+      }
+
+      .error {
+        color: #ffb4b4;
+      }
+
+      .clock {
+        font-family: "Barlow Condensed", sans-serif;
+        font-size: 64px;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        color: var(--muted);
+        opacity: 0;
+        animation: rise 700ms ease-out 520ms forwards;
+      }
+
+      .attribution {
+        font-size: 24px;
+        color: var(--muted);
+        opacity: 0;
+        animation: rise 700ms ease-out 600ms forwards;
+      }
+
+      .attribution a {
+        color: var(--ink);
+        text-decoration: none;
+        border-bottom: 1px solid rgba(244, 247, 251, 0.35);
+      }
+
+      @keyframes rise {
+        from {
+          opacity: 0;
+          transform: translateY(24px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="board" id="board">
+      <p class="eyebrow">Arrivals</p>
+      <h1>Next arrival</h1>
+      <div class="meta-row">
+        <div>
+          <div class="meta-label">Gate</div>
+          <div class="meta-value" id="gate">—</div>
+        </div>
+        <div style="text-align: right">
+          <div class="meta-label">Airport</div>
+          <div class="meta-value" id="iata">—</div>
+        </div>
+      </div>
+      <section class="card" id="content">
+        <p class="empty">Loading flight data…</p>
+      </section>
+      <div class="clock" id="clock"></div>
+      <p class="attribution">
+        <a href="https://www.avinor.no" target="_blank" rel="noreferrer"
+          >Flight data from Avinor</a
+        >
+      </p>
+    </main>
+
+    <script>
+      (function () {
+        const DEFAULT_API = "https://dynode-main-8eca196.zuplo.app";
+        const STATUS_LABELS = {
+          A: "Arrived",
+          C: "Cancelled",
+          D: "Departed",
+          E: "New time",
+          N: "New info",
+        };
+
+        const params = new URLSearchParams(window.location.search);
+        const playerId =
+          params.get("player") ||
+          params.get("com.broadsign.bsp.resource_id") ||
+          params.get("com.broadsign.suite.bsp.resource_id");
+        const apiBase = (params.get("api") || DEFAULT_API).replace(/\/$/, "");
+        const refreshSeconds = Math.max(
+          15,
+          Number(params.get("refresh") || 60) || 60,
+        );
+
+        const gateEl = document.getElementById("gate");
+        const iataEl = document.getElementById("iata");
+        const contentEl = document.getElementById("content");
+        const clockEl = document.getElementById("clock");
+
+        function tickClock() {
+          const now = new Date();
+          clockEl.textContent = now.toLocaleTimeString("en-GB", {
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+            hour12: false,
+          });
+        }
+
+        function formatTime(iso) {
+          if (!iso) return "—";
+          const date = new Date(iso);
+          if (Number.isNaN(date.getTime())) return iso;
+          return date.toLocaleTimeString("en-GB", {
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: false,
+            timeZone: "Europe/Oslo",
+          });
+        }
+
+        function etaLabel(flight) {
+          const code = flight.status && flight.status.code;
+          const statusTime = flight.status && flight.status.time;
+          if (!statusTime) return null;
+          if (code === "A") return { label: "Arrived", time: formatTime(statusTime) };
+          if (code === "E" || flight.delayed === "Y") {
+            return { label: "ETA", time: formatTime(statusTime) };
+          }
+          return { label: "Updated", time: formatTime(statusTime) };
+        }
+
+        function statusClass(code, delayed) {
+          if (code === "C") return "is-cancelled";
+          if (code === "E" || delayed === "Y") return "is-new-time";
+          return "";
+        }
+
+        function statusLabel(flight) {
+          const code = flight.status && flight.status.code;
+          if (flight.delayed === "Y" && code !== "C") {
+            return code === "E" ? "Delayed · New time" : "Delayed";
+          }
+          return STATUS_LABELS[code] || code || "Scheduled";
+        }
+
+        function pickNextArrival(flights) {
+          const now = Date.now();
+          const sorted = (flights || [])
+            .filter((flight) => flight.scheduleTime)
+            .slice()
+            .sort(
+              (a, b) =>
+                new Date(a.scheduleTime).getTime() -
+                new Date(b.scheduleTime).getTime(),
+            );
+
+          const upcoming = sorted.find(
+            (flight) =>
+              new Date(flight.scheduleTime).getTime() >= now - 15 * 60 * 1000,
+          );
+          return upcoming || sorted[sorted.length - 1] || null;
+        }
+
+        function renderError(message) {
+          contentEl.innerHTML = `<p class="error">${message}</p>`;
+        }
+
+        function renderFlight(payload) {
+          gateEl.textContent = payload.gate || "—";
+          iataEl.textContent = payload.iata || payload.airportCode || "—";
+
+          if (payload.error) {
+            renderError(payload.message || payload.error);
+            return;
+          }
+
+          const next = pickNextArrival(payload.flights);
+          if (!next) {
+            contentEl.innerHTML =
+              '<p class="empty">No upcoming arrivals for this gate.</p>';
+            return;
+          }
+
+          const status = statusLabel(next);
+          const klass = statusClass(
+            next.status && next.status.code,
+            next.delayed,
+          );
+          const eta = etaLabel(next);
+          const direction = (payload.direction || "A").toUpperCase();
+          const placeLabel = direction === "D" ? "To" : "From";
+          const city = next.airportName || next.airport || "—";
+          const cityCode = next.airportName && next.airport ? next.airport : "";
+
+          contentEl.innerHTML = `
+            <div class="flight-id">${next.flightId || "—"}</div>
+            <div>
+              <div class="meta-label">${placeLabel}</div>
+              <div class="city">${city}</div>
+              ${cityCode ? `<div class="city-code">${cityCode}</div>` : ""}
+            </div>
+            <dl class="detail-grid">
+              <div class="detail">
+                <dt>Scheduled</dt>
+                <dd>${formatTime(next.scheduleTime)}</dd>
+              </div>
+              <div class="detail">
+                <dt>${eta ? eta.label : "ETA"}</dt>
+                <dd>${eta ? eta.time : formatTime(next.scheduleTime)}</dd>
+              </div>
+              <div class="detail">
+                <dt>Airline</dt>
+                <dd>${next.airline || "—"}</dd>
+              </div>
+              <div class="detail">
+                <dt>Belt</dt>
+                <dd>${next.beltNumber || "—"}</dd>
+              </div>
+            </dl>
+            <div class="status ${klass}">${status}</div>
+          `;
+        }
+
+        function loadFlights() {
+          if (!playerId) {
+            renderError(
+              "Missing player id. Add ?player=… or ?com.broadsign.bsp.resource_id=… to the URL.",
+            );
+            return;
+          }
+
+          // Use the default JS response shape so this sample works without CORS.
+          const requestUrl = new URL(apiBase + "/flights/norway");
+          requestUrl.searchParams.set("player", playerId);
+          requestUrl.searchParams.set("direction", "A");
+
+          const previous = window.data;
+          window.data = undefined;
+
+          const script = document.createElement("script");
+          script.src = requestUrl.toString();
+          script.async = true;
+          script.onload = function () {
+            const payload = window.data;
+            window.data = previous;
+            script.remove();
+            if (!payload) {
+              renderError("Empty response from gateway.");
+              return;
+            }
+            renderFlight(payload);
+          };
+          script.onerror = function () {
+            script.remove();
+            window.data = previous;
+            renderError("Could not load flight data from the gateway.");
+          };
+          document.head.appendChild(script);
+        }
+
+        tickClock();
+        setInterval(tickClock, 1000);
+        loadFlights();
+        setInterval(loadFlights, refreshSeconds * 1000);
+      })();
+    </script>
+  </body>
+</html>
