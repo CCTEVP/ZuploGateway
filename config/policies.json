@@ -1,22 +1,64 @@
 {
   "policies": [
     {
-      "name": "weather-normalize-cache-key",
+      "name": "weather-sweden-normalize-cache-key",
       "policyType": "custom-code-inbound",
       "handler": {
         "export": "default",
-        "module": "$import(./modules/weather-normalize-cache-key)",
+        "module": "$import(./modules/weather-sweden-normalize-cache-key)",
         "options": {}
       }
     },
     {
-      "name": "weather-cache-inbound",
+      "name": "weather-sweden-cache-inbound",
       "policyType": "caching-inbound",
       "handler": {
         "export": "CachingInboundPolicy",
         "module": "$import(@zuplo/runtime)",
         "options": {
           "expirationSecondsTtl": 3600,
+          "statusCodes": [200]
+        }
+      }
+    },
+    {
+      "name": "weather-norway-normalize-cache-key",
+      "policyType": "custom-code-inbound",
+      "handler": {
+        "export": "default",
+        "module": "$import(./modules/weather-norway-normalize-cache-key)",
+        "options": {}
+      }
+    },
+    {
+      "name": "weather-norway-cache-inbound",
+      "policyType": "caching-inbound",
+      "handler": {
+        "export": "CachingInboundPolicy",
+        "module": "$import(@zuplo/runtime)",
+        "options": {
+          "expirationSecondsTtl": 3600,
+          "statusCodes": [200]
+        }
+      }
+    },
+    {
+      "name": "flights-normalize-cache-key",
+      "policyType": "custom-code-inbound",
+      "handler": {
+        "export": "default",
+        "module": "$import(./modules/flights-normalize-cache-key)",
+        "options": {}
+      }
+    },
+    {
+      "name": "flights-cache-inbound",
+      "policyType": "caching-inbound",
+      "handler": {
+        "export": "CachingInboundPolicy",
+        "module": "$import(@zuplo/runtime)",
+        "options": {
+          "expirationSecondsTtl": 60,
           "statusCodes": [200]
         }
       }

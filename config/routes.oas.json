@@ -5,30 +5,30 @@
     "title": "My Zuplo API"
   },
   "paths": {
-    "/weather/reset": {
+    "/weather/sweden/reset": {
       "post": {
-        "summary": "Reset weather cache",
-        "description": "Invalidates the weather cache by bumping the internal cache version used in weather request cache keys.",
+        "summary": "Reset Sweden weather cache",
+        "description": "Invalidates the Sweden weather cache by bumping the internal cache version used in weather request cache keys.",
         "responses": {
           "200": {
-            "description": "Weather cache reset successfully"
+            "description": "Sweden weather cache reset successfully"
           }
         },
-        "operationId": "reset-weather-cache",
+        "operationId": "reset-weather-sweden-cache",
         "x-zuplo-route": {
           "corsPolicy": "none",
           "handler": {
             "export": "default",
-            "module": "$import(./modules/weather-reset)"
+            "module": "$import(./modules/weather-sweden-reset)"
           }
         },
         "tags": ["Weather"]
       }
     },
-    "/weather/": {
+    "/weather/sweden": {
       "get": {
-        "summary": "Transform weather coordinates",
-        "description": "**Intercepts a latlon or player query parameter**, resolves coordinates, rounds them to 3 places, and rewrites the request to the destination weather service.",
+        "summary": "Sweden weather",
+        "description": "Resolves coordinates from the Sweden player dataset (or latlon) and returns OpenWeather data.",
         "parameters": [
           {
             "name": "latlon",
@@ -46,7 +46,7 @@
             "schema": {
               "type": "string"
             },
-            "description": "A Broadsign player ID resolved to latitude and longitude from the bundled player dataset. Optional when latlon is provided."
+            "description": "A Broadsign player ID resolved from the Sweden player dataset. Optional when latlon is provided."
           },
           {
             "name": "com.broadsign.suite.bsp.resource_id",
@@ -55,7 +55,7 @@
             "schema": {
               "type": "string"
             },
-            "description": "An alias of player that resolves the same Broadsign player ID to latitude and longitude from the CSV dataset. Optional when latlon or player is provided."
+            "description": "An alias of player that resolves the same Broadsign player ID from the Sweden dataset."
           },
           {
             "name": "debug",
@@ -65,7 +65,7 @@
               "type": "string",
               "enum": ["true", "false"]
             },
-            "description": "Optional debug flag. When set to true, the response includes a debug object with the original upstream OpenWeather URL, with the appid value masked. When false or omitted, debug is hidden."
+            "description": "Optional debug flag. When set to true, the response includes a debug object with the original upstream OpenWeather URL, with the appid value masked."
           },
           {
             "name": "format",
@@ -75,7 +75,7 @@
               "type": "string",
               "enum": ["json"]
             },
-            "description": "Optional response format. By default, /weather returns JavaScript as data = {...};. Use format=json to return raw JSON."
+            "description": "Optional response format. By default returns JavaScript as data = {...};. Use format=json to return raw JSON."
           }
         ],
         "responses": {
@@ -83,18 +83,239 @@
             "description": "A successful weather data response"
           }
         },
-        "operationId": "transform-weather-request",
+        "operationId": "get-weather-sweden",
         "x-zuplo-route": {
           "corsPolicy": "none",
           "policies": {
-            "inbound": ["weather-normalize-cache-key", "weather-cache-inbound"]
+            "inbound": [
+              "weather-sweden-normalize-cache-key",
+              "weather-sweden-cache-inbound"
+            ]
           },
           "handler": {
             "export": "default",
-            "module": "$import(./modules/weather-transform)"
+            "module": "$import(./modules/weather-sweden-transform)"
           }
         },
         "tags": ["Weather"]
+      }
+    },
+    "/weather/norway/reset": {
+      "post": {
+        "summary": "Reset Norway weather cache",
+        "description": "Invalidates the Norway weather cache by bumping the internal cache version used in weather request cache keys.",
+        "responses": {
+          "200": {
+            "description": "Norway weather cache reset successfully"
+          }
+        },
+        "operationId": "reset-weather-norway-cache",
+        "x-zuplo-route": {
+          "corsPolicy": "none",
+          "handler": {
+            "export": "default",
+            "module": "$import(./modules/weather-norway-reset)"
+          }
+        },
+        "tags": ["Weather"]
+      }
+    },
+    "/weather/norway": {
+      "get": {
+        "summary": "Norway weather",
+        "description": "Resolves coordinates from the Norway player dataset (or latlon) and returns OpenWeather data.",
+        "parameters": [
+          {
+            "name": "latlon",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The raw comma-separated coordinates (e.g., 60.1844248,11.0936436). Optional when player is provided."
+          },
+          {
+            "name": "player",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "A Broadsign player ID resolved from the Norway player dataset. Optional when latlon is provided."
+          },
+          {
+            "name": "com.broadsign.suite.bsp.resource_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "An alias of player that resolves the same Broadsign player ID from the Norway dataset."
+          },
+          {
+            "name": "debug",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["true", "false"]
+            },
+            "description": "Optional debug flag. When set to true, the response includes a debug object with the original upstream OpenWeather URL, with the appid value masked."
+          },
+          {
+            "name": "format",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["json"]
+            },
+            "description": "Optional response format. By default returns JavaScript as data = {...};. Use format=json to return raw JSON."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A successful weather data response"
+          }
+        },
+        "operationId": "get-weather-norway",
+        "x-zuplo-route": {
+          "corsPolicy": "none",
+          "policies": {
+            "inbound": [
+              "weather-norway-normalize-cache-key",
+              "weather-norway-cache-inbound"
+            ]
+          },
+          "handler": {
+            "export": "default",
+            "module": "$import(./modules/weather-norway-transform)"
+          }
+        },
+        "tags": ["Weather"]
+      }
+    },
+    "/flights/norway/reset": {
+      "post": {
+        "summary": "Reset flights cache",
+        "description": "Invalidates the Norway flights cache by bumping the internal cache version used in flights request cache keys.",
+        "responses": {
+          "200": {
+            "description": "Flights cache reset successfully"
+          }
+        },
+        "operationId": "reset-flights-cache",
+        "x-zuplo-route": {
+          "corsPolicy": "none",
+          "handler": {
+            "export": "default",
+            "module": "$import(./modules/flights-norway-reset)"
+          }
+        },
+        "tags": ["Flights"]
+      }
+    },
+    "/flights/norway": {
+      "get": {
+        "summary": "Norway flight information by gate",
+        "description": "Returns Avinor flight data for a gate at a Norwegian airport (default OSL). Provide either `gate` or `player` (mutually exclusive). Default direction is departures (D). Player records supply Gate and IATA.",
+        "parameters": [
+          {
+            "name": "gate",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Airport gate to filter flights (e.g. A4). Mutually exclusive with player."
+          },
+          {
+            "name": "player",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "A Broadsign player ID resolved to Gate and IATA from the Norway player dataset. Mutually exclusive with gate."
+          },
+          {
+            "name": "com.broadsign.suite.bsp.resource_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "An alias of player that resolves the same Broadsign player ID. Mutually exclusive with gate."
+          },
+          {
+            "name": "iata",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "IATA airport code override (e.g. OSL, BGO). Defaults to OSL when omitted and the player has no IATA configured. Alias: airport."
+          },
+          {
+            "name": "airport",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Alias of iata for compatibility."
+          },
+          {
+            "name": "direction",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["A", "D"]
+            },
+            "description": "Flight direction. A = arrivals, D = departures. Defaults to D."
+          },
+          {
+            "name": "debug",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["true", "false"]
+            },
+            "description": "Optional debug flag. When set to true, the response includes a debug object with the upstream Avinor URL and related metadata."
+          },
+          {
+            "name": "format",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["json"]
+            },
+            "description": "Optional response format. By default returns JavaScript as data = {...};. Use format=json to return raw JSON."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A successful flights data response"
+          }
+        },
+        "operationId": "get-norway-flights",
+        "x-zuplo-route": {
+          "corsPolicy": "none",
+          "policies": {
+            "inbound": [
+              "flights-normalize-cache-key",
+              "flights-cache-inbound"
+            ]
+          },
+          "handler": {
+            "export": "default",
+            "module": "$import(./modules/flights-norway-transform)"
+          }
+        },
+        "tags": ["Flights"]
       }
     }
   }

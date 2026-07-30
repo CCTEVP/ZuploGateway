@@ -1,0 +1,62 @@
+export type PlayerSourceRecord = {
+  BroadsignPlayerID: number;
+  Latitude: number;
+  Longitude: number;
+  /** Optional airport gate for flights endpoints (e.g. "A4"). */
+  Gate?: string;
+  /** Optional IATA airport code for flights endpoints (e.g. "OSL", "BGO"). */
+  IATA?: string;
+  DisplayUnitsID?: number;
+  BroadsignDisplayUnitID?: number;
+  FrameID?: number;
+  PanelsID?: number;
+  IDSFaceID?: number;
+  Country?: string;
+  Municipality?: string;
+  NameStreet?: string;
+  Address?: string;
+};
+
+export type PlayerRecord = {
+  playerId: string;
+  latitude: number;
+  longitude: number;
+  gate?: string;
+  iata?: string;
+};
+
+export type PlayerLookup = {
+  findSourceRecord: (playerId: string) => PlayerSourceRecord | undefined;
+  findPlayer: (playerId: string) => PlayerRecord | undefined;
+};
+
+export function createPlayerLookup(
+  records: PlayerSourceRecord[],
+): PlayerLookup {
+  function findSourceRecord(playerId: string) {
+    return records.find(
+      (item) => String(item.BroadsignPlayerID) === playerId,
+    );
+  }
+
+  function findPlayer(playerId: string): PlayerRecord | undefined {
+    const record = findSourceRecord(playerId);
+
+    if (!record) {
+      return undefined;
+    }
+
+    const gate = record.Gate?.trim();
+    const iata = record.IATA?.trim().toUpperCase();
+
+    return {
+      playerId: String(record.BroadsignPlayerID),
+      latitude: record.Latitude,
+      longitude: record.Longitude,
+      ...(gate ? { gate } : {}),
+      ...(iata ? { iata } : {}),
+    };
+  }
+
+  return { findSourceRecord, findPlayer };
+}

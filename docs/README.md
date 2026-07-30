@@ -5,43 +5,50 @@ gateway.
 
 ## Current Routes
 
-### `GET /weather/`
+### Weather
 
-Transforms weather requests before forwarding to OpenWeather.
+| Endpoint | Players |
+| --- | --- |
+| `GET /weather/sweden` | `modules/players/sweden.ts` |
+| `GET /weather/norway` | `modules/players/norway.ts` |
 
 Accepted query parameters:
 
-- `latlon`: Comma-separated coordinates (example: `32.46564,12.8737874`)
-- `player`: Player ID resolved from the bundled player-location dataset
+- `latlon`: Comma-separated coordinates
+- `player`: Player ID resolved from the country-specific player dataset
 - `com.broadsign.suite.bsp.resource_id`: Alias for `player`
 - `debug`: `true` or `false` (when `true`, includes debug metadata)
-- `filter`: `false` (when set, bypasses the response filter and returns the full upstream weather payload)
+- `filter`: `false` (when set, bypasses the response filter)
 - `format`: `json` (otherwise returns JavaScript: `data = {...};`)
 
 Behavior:
 
-- Requires one of `latlon`, `player`, or
-  `com.broadsign.suite.bsp.resource_id`
+- Requires one of `latlon`, `player`, or `com.broadsign.suite.bsp.resource_id`
 - Rounds latitude/longitude to 3 decimal places before upstream request
 - Applies inbound weather caching (`3600` seconds for HTTP `200` responses)
 - Applies response filtering by default unless `filter=false`
 - Adds `timestamp` to the response payload
-- Keeps `timestamp` and `debug` independent of filtering (`timestamp` always included, `debug` controlled by `debug=true`)
 
-Common responses:
+Cache reset:
 
-- `200`: Weather response (JSON or JavaScript wrapper)
-- `400`: Invalid or missing query parameters
-- `404`: Unknown `player` / `resource_id`
+- `POST /weather/sweden/reset`
+- `POST /weather/norway/reset`
 
-### `POST /weather/reset`
+### Flights Norway
 
-Resets the weather cache namespace by updating the internal cache version key.
+#### `GET /flights/norway`
 
-Common responses:
+Returns Avinor flight data filtered by gate. Player lookups use the Norway
+dataset (`Gate` + `IATA`).
 
-- `200`: Cache reset confirmation JSON:
-  `{ "cache": "weather", "reset": true, "version": "<timestamp>" }`
+Accepted query parameters:
+
+- `gate` or `player` / `com.broadsign.suite.bsp.resource_id` (mutually exclusive)
+- `iata` (optional; alias `airport`; default player IATA or `OSL`)
+- `direction` (`D` default, or `A`)
+- `debug`, `format`, `filter`
+
+Cache: 60 seconds. Reset with `POST /flights/norway/reset`.
 
 ## Local Development
 

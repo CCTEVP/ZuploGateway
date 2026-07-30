@@ -1,25 +1,6 @@
-export type PlayerLocationSourceRecord = {
-  BroadsignPlayerID: number;
-  DisplayUnitsID: number;
-  BroadsignDisplayUnitID: number;
-  FrameID: number;
-  PanelsID: number;
-  IDSFaceID: number;
-  Latitude: number;
-  Longitude: number;
-  Country: string;
-  Municipality: string;
-  NameStreet: string;
-  Address: string;
-};
+import { createPlayerLookup, type PlayerSourceRecord } from "./types";
 
-export type PlayerLocationRecord = {
-  playerId: string;
-  latitude: number;
-  longitude: number;
-};
-
-const playerLocationRecords: PlayerLocationSourceRecord[] = [
+const playerRecords: PlayerSourceRecord[] = [
   {
     BroadsignPlayerID: 759244535,
     DisplayUnitsID: 255,
@@ -232,22 +213,4 @@ const playerLocationRecords: PlayerLocationSourceRecord[] = [
   },
 ];
 
-export function findPlayerLocationSourceRecord(playerId: string) {
-  return playerLocationRecords.find(
-    (item) => String(item.BroadsignPlayerID) === playerId,
-  );
-}
-
-export function findPlayerLocation(playerId: string) {
-  const record = findPlayerLocationSourceRecord(playerId);
-
-  if (!record) {
-    return undefined;
-  }
-
-  return {
-    playerId: String(record.BroadsignPlayerID),
-    latitude: record.Latitude,
-    longitude: record.Longitude,
-  };
-}
+export const swedenPlayers = createPlayerLookup(playerRecords);

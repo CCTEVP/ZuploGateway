@@ -31,29 +31,63 @@ PowerShell launcher, which closes the previous listeners before starting npm:
 .\start-dev.ps1
 ```
 
-Player lookup data for the weather route is stored directly in
-`modules/player-location-data.ts` in the raw Broadsign record format so it can
-be updated directly in the Zuplo editor.
+## Player datasets
 
-The `/weather/` endpoint also supports an optional `debug=true|false` query
-parameter. When `debug=true`, the response includes a `debug` object with an
-`original` field containing the upstream OpenWeather URL, but with the `appid`
-value masked with `*` characters before it is returned. When the request uses a
-`player` or `com.broadsign.suite.bsp.resource_id`, the matched raw player data
-is also included under `debug.player`. Otherwise the `debug` object is omitted.
+Player lookup data is stored per country under `modules/players/` so it can be
+updated directly in the Zuplo editor:
 
-The `/weather/` endpoint applies response filtering by default. To bypass the
-filter and return the full upstream weather payload, set `filter=false`.
-`timestamp` and `debug` are still controlled independently (`timestamp` is
-always present, and `debug` is still controlled by `debug=true`).
+- `modules/players/sweden.ts` — Sweden weather players
+- `modules/players/norway.ts` — Norway weather + flights players
 
-By default, `/weather/` responds as JavaScript in the form
-`data = { ...current payload... };`. If you prefer raw JSON, use the optional
-query parameter `format=json`.
+Shared types live in `modules/players/types.ts`. Optional fields:
 
-To invalidate the weather cache on demand, send a `POST` request to
-`/weather/reset`. This bumps the internal cache version so subsequent weather
-requests bypass previously cached entries.
+- `Gate` — airport gate for flights (e.g. `D1`, `A4`)
+- `IATA` — airport IATA code for flights (e.g. `OSL`, `BGO`, `SVG`, `TRD`)
+
+## Weather
+
+Country-specific weather endpoints share OpenWeather upstream logic but use
+separate player datasets and cache namespaces (1 hour TTL).
+
+| Endpoint | Players | Cache reset |
+| --- | --- | --- |
+| `GET /weather/sweden` | Sweden dataset | `POST /weather/sweden/reset` |
+| `GET /weather/norway` | Norway dataset | `POST /weather/norway/reset` |
+
+Common query parameters: `latlon`, `player` /
+`com.broadsign.suite.bsp.resource_id`, `debug`, `format=json`, `filter=false`.
+
+By default responses are JavaScript (`data = {...};`). Use `format=json` for
+raw JSON. When `debug=true`, the response includes a `debug` object with the
+upstream OpenWeather URL (`appid` masked) and matched player data when
+applicable.
+
+## Flights Norway (`/flights/norway`)
+
+`GET /flights/norway` returns Avinor flight data filtered by gate. Upstream data
+comes from Avinor's public XmlFeed (`asrv.avinor.no/XmlFeed/v1.0`). No API key
+is required. Responses are cached for **1 minute**.
+
+Provide **either** `gate` **or** `player` /
+`com.broadsign.suite.bsp.resource_id` — never both.
+
+| Parameter | Description |
+| --- | --- |
+| `gate` | Gate to filter (e.g. `A4`). Mutually exclusive with `player`. |
+| `player` | Broadsign player ID. Resolves `Gate` and `IATA` from the Norway dataset. |
+| `iata` | IATA airport override. Defaults to player `IATA`, else `OSL`. Alias: `airport`. |
+| `direction` | `D` (departures, default) or `A` (arrivals). |
+| `debug` | When `true`, includes upstream URL and related debug metadata. |
+| `format` | Default is JavaScript `data = {...};`. Use `format=json` for raw JSON. |
+| `filter` | Set `filter=false` to bypass the response field allowlist. |
+
+If a known player has no `Gate` configured, the endpoint returns a standard
+error body with `error: "player_has_no_gate"`.
+
+Successful responses include an `attribution` object (`Flight data from Avinor`
+→ [avinor.no](https://www.avinor.no)).
+
+To invalidate the flights cache, send `POST /flights/norway/reset`.
 
 You can start editing the API by modifying `config/routes.oas.json`. The dev
 server will automatically reload the API with your changes.

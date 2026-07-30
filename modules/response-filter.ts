@@ -3,6 +3,17 @@ const responseFilterConfig = {
     show: ["coord", "main.temp", "weather[0].main", "wind.speed", "rain.1h"],
     hide: [],
   },
+  flights: {
+    show: [
+      "iata",
+      "airportCode",
+      "direction",
+      "gate",
+      "flights",
+      "attribution",
+    ],
+    hide: [],
+  },
 };
 
 type PathPart = string | number;
