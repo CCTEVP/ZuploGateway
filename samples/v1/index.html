@@ -248,8 +248,8 @@
   </head>
   <body>
     <main class="board" id="board">
-      <p class="eyebrow">Arrivals</p>
-      <h1>Next arrival</h1>
+      <p class="eyebrow" id="eyebrow">Arrivals</p>
+      <h1 id="headline">Next arrival</h1>
       <div class="meta-row">
         <div>
           <div class="meta-label">Gate</div>
@@ -288,6 +288,9 @@
           params.get("com.broadsign.bsp.resource_id") ||
           params.get("com.broadsign.suite.bsp.resource_id");
         const apiBase = (params.get("api") || DEFAULT_API).replace(/\/$/, "");
+        const direction = (
+          params.get("direction") || "D"
+        ).trim().toUpperCase();
         const refreshSeconds = Math.max(
           15,
           Number(params.get("refresh") || 60) || 60,
@@ -297,6 +300,16 @@
         const iataEl = document.getElementById("iata");
         const contentEl = document.getElementById("content");
         const clockEl = document.getElementById("clock");
+        const eyebrowEl = document.getElementById("eyebrow");
+        const headlineEl = document.getElementById("headline");
+
+        if (direction === "D") {
+          eyebrowEl.textContent = "Departures";
+          headlineEl.textContent = "Next departure";
+        } else {
+          eyebrowEl.textContent = "Arrivals";
+          headlineEl.textContent = "Next arrival";
+        }
 
         function tickClock() {
           const now = new Date();
@@ -345,7 +358,7 @@
           return STATUS_LABELS[code] || code || "Scheduled";
         }
 
-        function pickNextArrival(flights) {
+        function pickNextFlight(flights) {
           const now = Date.now();
           const sorted = (flights || [])
             .filter((flight) => flight.scheduleTime)
@@ -376,10 +389,11 @@
             return;
           }
 
-          const next = pickNextArrival(payload.flights);
+          const next = pickNextFlight(payload.flights);
           if (!next) {
-            contentEl.innerHTML =
-              '<p class="empty">No upcoming arrivals for this gate.</p>';
+            contentEl.innerHTML = `<p class="empty">No upcoming ${
+              direction === "D" ? "departures" : "arrivals"
+            } for this gate.</p>`;
             return;
           }
 
@@ -389,10 +403,14 @@
             next.delayed,
           );
           const eta = etaLabel(next);
-          const direction = (payload.direction || "A").toUpperCase();
           const placeLabel = direction === "D" ? "To" : "From";
           const city = next.airportName || next.airport || "—";
           const cityCode = next.airportName && next.airport ? next.airport : "";
+          const secondaryLabel = direction === "D" ? "Gate" : "Belt";
+          const secondaryValue =
+            direction === "D"
+              ? next.gate || payload.gate || "—"
+              : next.beltNumber || "—";
 
           contentEl.innerHTML = `
             <div class="flight-id">${next.flightId || "—"}</div>
@@ -407,7 +425,7 @@
                 <dd>${formatTime(next.scheduleTime)}</dd>
               </div>
               <div class="detail">
-                <dt>${eta ? eta.label : "ETA"}</dt>
+                <dt>${eta ? eta.label : direction === "D" ? "ETD" : "ETA"}</dt>
                 <dd>${eta ? eta.time : formatTime(next.scheduleTime)}</dd>
               </div>
               <div class="detail">
@@ -415,8 +433,8 @@
                 <dd>${next.airline || "—"}</dd>
               </div>
               <div class="detail">
-                <dt>Belt</dt>
-                <dd>${next.beltNumber || "—"}</dd>
+                <dt>${secondaryLabel}</dt>
+                <dd>${secondaryValue}</dd>
               </div>
             </dl>
             <div class="status ${klass}">${status}</div>
@@ -434,7 +452,7 @@
           // Use the default JS response shape so this sample works without CORS.
           const requestUrl = new URL(apiBase + "/flights/norway");
           requestUrl.searchParams.set("player", playerId);
-          requestUrl.searchParams.set("direction", "A");
+          requestUrl.searchParams.set("direction", direction);
 
           const previous = window.data;
           window.data = undefined;
