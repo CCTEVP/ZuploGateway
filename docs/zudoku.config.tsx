@@ -7,7 +7,7 @@ import type { ZudokuConfig } from "zudoku";
  */
 const config: ZudokuConfig = {
   site: {
-    title: "My Developer Portal",
+    title: "Dynode Gateway",
     logo: {
       src: {
         light: "https://cdn.zuplo.com/assets/my-dev-portal-light.svg",
@@ -16,8 +16,9 @@ const config: ZudokuConfig = {
     },
   },
   metadata: {
-    title: "Developer Portal",
-    description: "Developer Portal",
+    title: "Dynode Gateway",
+    description:
+      "Weather and Norway flights API gateway (OpenWeather + Avinor) for Broadsign players.",
   },
   navigation: [
     {

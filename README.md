@@ -1,103 +1,184 @@
-## Zuplo API
+## Dynode (Zuplo Gateway)
 
-This is a Zuplo API that was created with
-[`create-zuplo-api`](https://zuplo.com/docs).
+Zuplo-managed edge API that serves **weather** (OpenWeather) and **Norway
+flights** (Avinor), keyed by Broadsign player datasets.
+
+Created with [`create-zuplo-api`](https://zuplo.com/docs).
+
+**Further reading**
+
+- [REQUIREMENTS.md](REQUIREMENTS.md) — functional / non-functional requirements
+- [INFRASTRUCTURE.md](INFRASTRUCTURE.md) — hosting, caches, upstreams, deploy
 
 ## Getting Started
 
-First, run the development server:
-
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
 ```
 
-Open [http://localhost:9000](http://localhost:9000) with your browser to see the
-result.
+Gateway: [http://localhost:9000](http://localhost:9000)  
+Editor: port `9100`
 
-If you also want the docs server locally, run:
+Docs portal:
 
 ```bash
 npm run docs
 ```
 
-If port `9000` or `9100` is already in use, you can start the gateway with the
-PowerShell launcher, which closes the previous listeners before starting npm:
+If ports `9000` / `9100` are in use on Windows:
 
 ```powershell
 .\start-dev.ps1
 ```
 
+### Environment
+
+Copy `env.example` to `.env`:
+
+| Variable | Required for | Notes |
+| --- | --- | --- |
+| `OPENWEATHER_API_KEY` | `/weather/*` | OpenWeather API key |
+| Flights | `/flights/norway` | No API key (public Avinor XmlFeed) |
+
+Deployed secrets are set in the Zuplo portal (not only in Git).
+
+## Architecture
+
+| Layer | Location |
+| --- | --- |
+| Routes | `config/routes.oas.json` |
+| Policies | `config/policies.json` |
+| Handlers / policies | `modules/` |
+| Player data | `modules/players/` |
+| Sample signage client | `samples/v1/` |
+| Developer portal | `docs/` (Zudoku) |
+
+```mermaid
+flowchart LR
+  Client --> WeatherSE["/weather/sweden"]
+  Client --> WeatherNO["/weather/norway"]
+  Client --> FlightsNO["/flights/norway"]
+  WeatherSE --> OpenWeather
+  WeatherNO --> OpenWeather
+  FlightsNO --> Avinor
+```
+
 ## Player datasets
 
-Player lookup data is stored per country under `modules/players/` so it can be
-updated directly in the Zuplo editor:
+Country files under `modules/players/`:
 
-- `modules/players/sweden.ts` — Sweden weather players
-- `modules/players/norway.ts` — Norway weather + flights players
-- `modules/players/test.ts` — shared demo/QA players merged into **every**
-  country lookup (so the same Broadsign test IDs work on `/weather/sweden`,
-  `/weather/norway`, `/flights/norway`, etc.)
+| File | Used by |
+| --- | --- |
+| `sweden.ts` | `/weather/sweden` |
+| `norway.ts` | `/weather/norway`, `/flights/norway` |
+| `test.ts` | Merged into **every** country lookup (demo/QA players) |
 
-Shared types live in `modules/players/types.ts`. Optional fields:
+Shared helper: `createCountryPlayerLookup(countryRecords, testPlayerRecords)`.
 
-- `Gate` — airport gate for flights (e.g. `D1`, `A4`)
-- `IATA` — airport IATA code for flights (e.g. `OSL`, `BGO`, `SVG`, `TRD`)
+Optional player fields:
+
+- `Gate` — airport gate (flights)
+- `IATA` — airport code (flights; e.g. `OSL`, `BGO`)
+
+Demo/QA player IDs (always available):
+
+| Player ID | Gate | IATA |
+| --- | --- | --- |
+| `759244535` | D9 | OSL |
+| `582309742` | D1 | OSL |
+
+Player id query aliases (weather + flights):
+
+- `player`
+- `com.broadsign.suite.bsp.resource_id`
 
 ## Weather
 
-Country-specific weather endpoints share OpenWeather upstream logic but use
-separate player datasets and cache namespaces (1 hour TTL).
+Shared OpenWeather handler; country-specific player datasets and caches
+(**1 hour** TTL).
 
-| Endpoint | Players | Cache reset |
+| Endpoint | Dataset | Reset |
 | --- | --- | --- |
-| `GET /weather/sweden` | Sweden dataset | `POST /weather/sweden/reset` |
-| `GET /weather/norway` | Norway dataset | `POST /weather/norway/reset` |
+| `GET /weather/sweden` | Sweden + test | `POST /weather/sweden/reset` |
+| `GET /weather/norway` | Norway + test | `POST /weather/norway/reset` |
 
-Common query parameters: `latlon`, `player` /
-`com.broadsign.suite.bsp.resource_id`, `debug`, `format=json`, `filter=false`.
+Parameters: `latlon`, `player` / `com.broadsign.suite.bsp.resource_id`,
+`debug`, `format=json`, `filter=false`.
 
-By default responses are JavaScript (`data = {...};`). Use `format=json` for
-raw JSON. When `debug=true`, the response includes a `debug` object with the
-upstream OpenWeather URL (`appid` masked) and matched player data when
-applicable.
+Default body is JavaScript: `data = {...};`.
 
-## Flights Norway (`/flights/norway`)
+## Flights Norway
 
-`GET /flights/norway` returns Avinor flight data filtered by gate. Upstream data
-comes from Avinor's public XmlFeed (`asrv.avinor.no/XmlFeed/v1.0`). No API key
-is required. Responses are cached for **1 minute**.
+`GET /flights/norway` — Avinor XmlFeed, filtered by gate. Cache **60 seconds**.
 
-Provide **either** `gate` **or** `player` /
-`com.broadsign.suite.bsp.resource_id` — never both.
+Provide **either** `gate` **or** `player` / resource id — never both.
 
 | Parameter | Description |
 | --- | --- |
-| `gate` | Gate to filter (e.g. `A4`). Mutually exclusive with `player`. |
-| `player` | Broadsign player ID. Resolves `Gate` and `IATA` from the Norway dataset. |
-| `iata` | IATA airport override. Defaults to player `IATA`, else `OSL`. Alias: `airport`. |
-| `direction` | `D` (departures, default) or `A` (arrivals). |
-| `debug` | When `true`, includes upstream URL and related debug metadata. |
-| `format` | Default is JavaScript `data = {...};`. Use `format=json` for raw JSON. |
-| `filter` | Set `filter=false` to bypass the response field allowlist. |
+| `gate` | Gate filter (e.g. `D1`). Mutually exclusive with `player`. |
+| `player` | Resolves `Gate` + `IATA` from Norway (+ test) players. |
+| `iata` | Airport override (default player IATA, else `OSL`). Alias: `airport`. |
+| `direction` | `D` departures (default) or `A` arrivals. |
+| `debug` / `format` / `filter` | Same semantics as weather. |
 
-If a known player has no `Gate` configured, the endpoint returns a standard
-error body with `error: "player_has_no_gate"`.
+Each flight may include `airportName` (city/airport label from Avinor
+`airportNames`). Arrivals often lack matching gate codes; departures match
+player gates more reliably.
 
-Successful responses include an `attribution` object (`Flight data from Avinor`
-→ [avinor.no](https://www.avinor.no)).
+Reset: `POST /flights/norway/reset`.
 
-To invalidate the flights cache, send `POST /flights/norway/reset`.
+Attribution in responses: “Flight data from Avinor” → [avinor.no](https://www.avinor.no).
 
-You can start editing the API by modifying `config/routes.oas.json`. The dev
-server will automatically reload the API with your changes.
+### Examples
+
+```bash
+GET /flights/norway?player=582309742&format=json
+GET /flights/norway?gate=D9&iata=OSL&direction=D&format=json
+GET /weather/norway?player=582309742&format=json
+GET /weather/sweden?player=582607705&format=json
+```
+
+## Sample client (`samples/v1`)
+
+1080×1920 portrait signage board:
+
+| File | Role |
+| --- | --- |
+| `index.html` | Markup |
+| `styles.css` | Layout |
+| `app.js` | Renders next departure/arrival from local data |
+
+Data is **not** fetched from Zuplo at runtime. The HTML loads:
+
+```text
+./../../bsp/sync/bmonorway/flightsdata.js
+```
+
+That file should define the Zuplo JS response shape, e.g.:
+
+```js
+data = { "iata": "OSL", "direction": "D", "gate": "D1", "flights": [/* ... */], ... };
+```
+
+Download/sync a `/flights/norway` response into that path as needed. Optional
+query: `?direction=A` or `?direction=D` to force labels.
+
+## Project layout (key paths)
+
+```text
+config/routes.oas.json      OpenAPI + x-zuplo-route wiring
+config/policies.json        Cache + normalize policies
+modules/weather-handler.ts  Shared weather factory
+modules/avinor-xml.ts       Avinor feed + airport names
+modules/players/            Country + test player data
+samples/v1/                 Signage sample
+docs/                       Zudoku developer portal
+zuplo.jsonc                 Zuplo project metadata
+```
 
 ## Learn More
 
-To learn more about Zuplo, you can visit the
-[Zuplo documentation](https://zuplo.com/docs).
-
-To connect with the community join [Discord](https://discord.zuplo.com).
+- [REQUIREMENTS.md](REQUIREMENTS.md)
+- [INFRASTRUCTURE.md](INFRASTRUCTURE.md)
+- [Zuplo documentation](https://zuplo.com/docs)
+- [Discord](https://discord.zuplo.com)

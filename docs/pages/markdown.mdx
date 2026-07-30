@@ -1,66 +1,103 @@
-# Weather Endpoint Quick Reference
+---
+description: Copy-paste request patterns for weather and flights.
+sidebar_label: Quick Reference
+sidebar_icon: terminal
+category: ""
+---
 
-Use this page for copy-paste request patterns and expected response shape.
+# Quick Reference
 
-## Request Patterns
+## Weather
 
 ```http
-GET /weather/?latlon=32.46564,12.8737874
+GET /weather/sweden?latlon=59.339,18.067&format=json
 ```
 
 ```http
-GET /weather/?player=123456&format=json
+GET /weather/norway?player=582309742&format=json
 ```
 
 ```http
-GET /weather/?com.broadsign.suite.bsp.resource_id=123456&format=json
+GET /weather/norway?com.broadsign.suite.bsp.resource_id=582309742&debug=true&format=json
 ```
 
 ```http
-GET /weather/?latlon=32.46564,12.8737874&debug=true&format=json
+GET /weather/sweden?latlon=59.339,18.067&filter=false&format=json
 ```
 
 ```http
-GET /weather/?latlon=32.46564,12.8737874&filter=false&format=json
+POST /weather/sweden/reset
 ```
 
 ```http
-POST /weather/reset
+POST /weather/norway/reset
 ```
 
-## Response Format
+## Flights Norway
 
-Default response is JavaScript:
+```http
+GET /flights/norway?player=582309742&format=json
+```
+
+```http
+GET /flights/norway?player=759244535&direction=D&format=json
+```
+
+```http
+GET /flights/norway?gate=D1&iata=OSL&direction=D&format=json
+```
+
+```http
+GET /flights/norway?com.broadsign.suite.bsp.resource_id=582309742&format=json
+```
+
+```http
+POST /flights/norway/reset
+```
+
+## Response format
+
+Default (JavaScript):
 
 ```javascript
-data = { ...payload };
+data = { /* payload */ };
 ```
 
-With format=json:
+With `format=json`:
 
 ```json
-{
-  "coord": { "lon": 12.874, "lat": 32.466 },
-  "main": { "temp": 19.7 },
-  "weather": [{ "main": "Clouds" }],
-  "wind": { "speed": 3.6 },
-  "rain": { "1h": 0.12 },
-  "timestamp": "2026-05-19T11:18:22.000Z"
-}
+{ "timestamp": "...", "...": "..." }
 ```
 
-## Filtering Rules
+### Flights success (filtered) fields
 
-- By default, weather payload is filtered.
-- Set filter=false to return the full upstream payload.
-- timestamp is always returned.
-- debug is only returned when debug=true.
+- `iata` / `airportCode`
+- `direction`
+- `gate`
+- `flights[]` — includes `flightId`, `airline`, `scheduleTime`, `airport`,
+  `airportName`, `gate`, `beltNumber`, `status`, `delayed`, …
+- `attribution`
+- `timestamp`
 
-## Status Codes
+### Common errors
 
-| Endpoint            | Status | Meaning                             |
-| ------------------- | ------ | ----------------------------------- |
-| GET /weather/       | 200    | Success                             |
-| GET /weather/       | 400    | Missing or invalid query parameters |
-| GET /weather/       | 404    | Unknown player or resource_id       |
-| POST /weather/reset | 200    | Cache version bumped                |
+| Status | When |
+| --- | --- |
+| 400 | Missing params, `gate`+`player` together, player has no gate, invalid direction/format |
+| 404 | Unknown player id |
+
+## Sample client
+
+Save a flights JS response to:
+
+```text
+bsp/sync/bmonorway/flightsdata.js
+```
+
+as:
+
+```javascript
+data = { /* paste Zuplo /flights/norway body */ };
+```
+
+Then open `samples/v1/index.html` (1080×1920 board).

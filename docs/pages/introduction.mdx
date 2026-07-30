@@ -1,70 +1,85 @@
 ---
-description: Overview of the Zuplo weather gateway service.
+description: Overview of the Dynode weather and flights gateway.
 sidebar_label: Service Overview
 sidebar_icon: cloud
 category: ""
 ---
 
-# Zuplo Weather Gateway
+# Dynode Gateway
 
-This service provides two weather-focused endpoints:
+Edge API on Zuplo for **weather** (OpenWeather) and **Norway flights**
+(Avinor), resolved from Broadsign player datasets.
 
-- GET /weather/
-- POST /weather/reset
+The [API Reference](/api) is generated from `config/routes.oas.json` and is the
+source of truth for parameter schemas.
 
-The API reference page is generated from the OpenAPI file and remains the source of truth for route
-shape and examples.
+## Endpoints
 
-## GET /weather/
+### Weather
 
-Resolves coordinates, calls OpenWeather, and returns a transformed response.
+| Method | Path | Players |
+| --- | --- | --- |
+| GET | `/weather/sweden` | Sweden + shared test |
+| POST | `/weather/sweden/reset` | Cache invalidate |
+| GET | `/weather/norway` | Norway + shared test |
+| POST | `/weather/norway/reset` | Cache invalidate |
 
-### Query Parameters
+Weather cache TTL: **1 hour**. Requires `OPENWEATHER_API_KEY`.
 
-- latlon: Comma-separated coordinates, for example 32.46564,12.8737874
-- player: Player ID resolved from the bundled player-location dataset
-- com.broadsign.suite.bsp.resource_id: Alias for player
-- debug: true or false. When true, adds a debug object to the response.
-- filter: false disables response filtering and returns the full upstream payload.
-- format: json returns JSON. Default response is JavaScript in the form `data = {...};`.
+### Flights
 
-### Behavior Notes
+| Method | Path | Notes |
+| --- | --- | --- |
+| GET | `/flights/norway` | Avinor XmlFeed, gate filter |
+| POST | `/flights/norway/reset` | Cache invalidate |
 
-- One of latlon, player, or com.broadsign.suite.bsp.resource_id is required.
-- Latitude and longitude are normalized to 3 decimal places before upstream request.
-- Response filtering is enabled by default.
-- timestamp is always included.
-- debug visibility is controlled only by debug=true.
-- When debug=true, debug.original contains the upstream URL with appid masked.
+Flights cache TTL: **60 seconds**. No Avinor API key.
 
-### Common Errors
+## Player resolution
 
-- 400 for missing or invalid query parameters.
-- 404 when player or resource_id cannot be resolved.
+Country datasets: `modules/players/sweden.ts`, `modules/players/norway.ts`.
 
-## POST /weather/reset
+Shared demo/QA players in `modules/players/test.ts` are merged into **every**
+country lookup.
 
-Invalidates weather cache namespace by bumping the internal cache version key.
+Query aliases for player id:
 
-- Method: POST
-- Path: /weather/reset
-- Success response: 200
+- `player`
+- `com.broadsign.suite.bsp.resource_id`
 
-## Local Testing Examples
+Optional player fields for flights: `Gate`, `IATA`.
+
+Demo IDs: `759244535` (gate D9 / OSL), `582309742` (gate D1 / OSL).
+
+## Common response behaviour
+
+- Default body: JavaScript `data = {...};`
+- `format=json` for raw JSON
+- `filter=false` bypasses field allowlist
+- `debug=true` adds upstream/debug metadata
+- `timestamp` is always present on success payloads
+
+## Flights notes
+
+- Provide **either** `gate` **or** `player` / resource id (not both).
+- `direction=D` (default) or `A`.
+- `iata` overrides airport (alias `airport`); default player IATA or `OSL`.
+- Flights include `airportName` when Avinor airport names resolve.
+- Departures match player gates more reliably than arrivals.
+
+## Sample signage client
+
+`samples/v1/` is a 1080×1920 board that reads local
+`bsp/sync/bmonorway/flightsdata.js` (Zuplo JS download shape). It does not call
+the live gateway at runtime.
+
+## Local examples
 
 ```bash
-# Default JavaScript response with filter enabled
-GET /weather/?latlon=32.46564,12.8737874
-
-# Raw JSON response
-GET /weather/?latlon=32.46564,12.8737874&format=json
-
-# Return full upstream payload (filter disabled)
-GET /weather/?latlon=32.46564,12.8737874&filter=false&format=json
-
-# Include debug metadata
-GET /weather/?player=YOUR_PLAYER_ID&debug=true&format=json
-
-# Reset cache
-POST /weather/reset
+GET /weather/norway?player=582309742&format=json
+GET /weather/sweden?player=582607705&format=json
+GET /flights/norway?player=582309742&format=json
+GET /flights/norway?gate=D9&direction=D&format=json
+POST /flights/norway/reset
+POST /weather/norway/reset
 ```
