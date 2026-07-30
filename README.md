@@ -38,6 +38,9 @@ updated directly in the Zuplo editor:
 
 - `modules/players/sweden.ts` — Sweden weather players
 - `modules/players/norway.ts` — Norway weather + flights players
+- `modules/players/test.ts` — shared demo/QA players merged into **every**
+  country lookup (so the same Broadsign test IDs work on `/weather/sweden`,
+  `/weather/norway`, `/flights/norway`, etc.)
 
 Shared types live in `modules/players/types.ts`. Optional fields:
 

@@ -1,4 +1,8 @@
-import { createPlayerLookup, type PlayerSourceRecord } from "./types";
+import {
+  createCountryPlayerLookup,
+  type PlayerSourceRecord,
+} from "./types";
+import { testPlayerRecords } from "./test";
 
 const playerRecords: PlayerSourceRecord[] = [
   {
@@ -451,4 +455,7 @@ const playerRecords: PlayerSourceRecord[] = [
   },
 ];
 
-export const norwayPlayers = createPlayerLookup(playerRecords);
+export const norwayPlayers = createCountryPlayerLookup(
+  playerRecords,
+  testPlayerRecords,
+);

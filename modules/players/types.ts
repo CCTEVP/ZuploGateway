@@ -30,6 +30,25 @@ export type PlayerLookup = {
   findPlayer: (playerId: string) => PlayerRecord | undefined;
 };
 
+/**
+ * Country datasets win on ID collision; shared/test players are appended so
+ * they remain available on every country endpoint.
+ */
+export function mergePlayerRecords(
+  countryRecords: PlayerSourceRecord[],
+  sharedRecords: PlayerSourceRecord[],
+): PlayerSourceRecord[] {
+  const countryIds = new Set(
+    countryRecords.map((record) => record.BroadsignPlayerID),
+  );
+  return [
+    ...countryRecords,
+    ...sharedRecords.filter(
+      (record) => !countryIds.has(record.BroadsignPlayerID),
+    ),
+  ];
+}
+
 export function createPlayerLookup(
   records: PlayerSourceRecord[],
 ): PlayerLookup {
@@ -59,4 +78,11 @@ export function createPlayerLookup(
   }
 
   return { findSourceRecord, findPlayer };
+}
+
+export function createCountryPlayerLookup(
+  countryRecords: PlayerSourceRecord[],
+  sharedRecords: PlayerSourceRecord[],
+): PlayerLookup {
+  return createPlayerLookup(mergePlayerRecords(countryRecords, sharedRecords));
 }
