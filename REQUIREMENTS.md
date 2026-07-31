@@ -50,7 +50,7 @@ in [INFRASTRUCTURE.md](INFRASTRUCTURE.md).
 | F-6 | Upstream: public Avinor XmlFeed + airportNames enrichment (`airportName`). |
 | F-7 | Filter flights to the resolved gate. |
 | F-8 | Include Avinor attribution in the payload. |
-| F-9 | Cache successful HTTP 200 for **60s**; reset via `POST /flights/norway/reset`. |
+| F-9 | Cache successful HTTP 200 for **180s** (aligned with Avinor’s ~3 minute refresh guidance); reset via `POST /flights/norway/reset`. |
 | F-10 | Same `format` / `filter` / `debug` conventions as weather. |
 
 ### 2.4 Sample signage client

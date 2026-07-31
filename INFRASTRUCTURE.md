@@ -54,7 +54,7 @@ Client
 | --- | --- | --- | --- | --- |
 | Weather Sweden | `weather-sweden-normalize-cache-key` | `weather-sweden-cache-inbound` | 3600s | `POST /weather/sweden/reset` |
 | Weather Norway | `weather-norway-normalize-cache-key` | `weather-norway-cache-inbound` | 3600s | `POST /weather/norway/reset` |
-| Flights Norway | `flights-normalize-cache-key` | `flights-cache-inbound` | 60s | `POST /flights/norway/reset` |
+| Flights Norway | `flights-normalize-cache-key` | `flights-cache-inbound` | 180s | `POST /flights/norway/reset` |
 
 Only HTTP **200** responses are cached. Cache invalidation bumps a `ZoneCache`
 version key included in the normalized request URL.
@@ -67,8 +67,16 @@ version key included in the normalized request URL.
 | Avinor XmlFeed `asrv.avinor.no/XmlFeed/v1.0` | HTTPS XML | None | Flights by airport |
 | Avinor airportNames `asrv.avinor.no/airportNames/v1.0` | HTTPS XML | None | IATA → city/name (`airportName`) |
 
-Avinor parameter names are **case-sensitive**. Gateway enriches flights in-process
-and caches airport-name maps in memory (process/isolate lifetime, ~24h TTL logic).
+Avinor parameter names are **case-sensitive**. Responses are
+`Content-Type: application/xml;charset=iso-8859-1` with XML decl
+`encoding="ISO-8859-1"`. The gateway decodes with `TextDecoder("iso-8859-1")`
+before parsing so Norwegian characters (æ/ø/å) stay intact, then returns UTF-8
+JSON/JS to clients.
+
+Gateway enriches flights in-process and caches airport-name maps in memory
+(process/isolate lifetime, ~24h TTL logic). Avinor asks consumers to refresh
+flight feeds about **every 3 minutes** and to cache on their side; reference
+data (airport/airline names, statuses) need not be polled more than daily.
 
 ## 5. Data plane (players)
 

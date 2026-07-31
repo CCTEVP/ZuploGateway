@@ -56,6 +56,15 @@ function getAttribute(xml: string, attr: string): string | undefined {
   return match?.[1]?.trim() || undefined;
 }
 
+/**
+ * Avinor XML is declared/served as ISO-8859-1. `response.text()` would decode
+ * as UTF-8 and corrupt Norwegian characters (æ/ø/å).
+ */
+export async function readAvinorXml(response: Response): Promise<string> {
+  const buffer = await response.arrayBuffer();
+  return new TextDecoder("iso-8859-1").decode(buffer);
+}
+
 function parseFlightElement(flightXml: string): AvinorFlight {
   const statusMatch = flightXml.match(/<status\b[^/]*\/?>/i)?.[0];
 
@@ -153,7 +162,7 @@ export async function getAvinorAirportNames(): Promise<Record<string, string>> {
     return airportNameCache ?? {};
   }
 
-  const xml = await response.text();
+  const xml = await readAvinorXml(response);
   airportNameCache = parseAirportNamesXml(xml);
   airportNameCacheLoadedAt = now;
   return airportNameCache;
@@ -184,7 +193,7 @@ export async function fetchAvinorFlights(
     fetch(url.toString()),
     getAvinorAirportNames(),
   ]);
-  const xml = await response.text();
+  const xml = await readAvinorXml(response);
   const feed = parseAvinorXmlFeed(xml);
   feed.flights = enrichFlightsWithAirportNames(feed.flights, airportNames);
 

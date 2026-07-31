@@ -109,7 +109,8 @@ Default body is JavaScript: `data = {...};`.
 
 ## Flights Norway
 
-`GET /flights/norway` — Avinor XmlFeed, filtered by gate. Cache **60 seconds**.
+`GET /flights/norway` — Avinor XmlFeed, filtered by gate. Cache **180 seconds**
+(Avinor recommends refreshing about every 3 minutes).
 
 Provide **either** `gate` **or** `player` / resource id — never both.
 

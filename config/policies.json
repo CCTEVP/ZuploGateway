@@ -58,7 +58,7 @@
         "export": "CachingInboundPolicy",
         "module": "$import(@zuplo/runtime)",
         "options": {
-          "expirationSecondsTtl": 60,
+          "expirationSecondsTtl": 180,
           "statusCodes": [200]
         }
       }
