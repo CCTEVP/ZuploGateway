@@ -69,9 +69,17 @@ Demo IDs: `759244535` (gate D9 / OSL), `582309742` (gate D1 / OSL).
 
 ## Sample signage client
 
-`samples/v1/` is a 1080×1920 board that reads local
-`bsp/sync/bmonorway/flightsdata.js` (Zuplo JS download shape). It does not call
-the live gateway at runtime.
+The **1080×1920** board lives at `/samples/v1/` in the docs portal (source:
+`samples/v1/` and `docs/public/samples/v1/`). It loads flight data from the live
+gateway:
+
+```text
+https://dynode-main-8eca196.zuplo.app/flights/norway?…
+```
+
+Pass a player on the sample URL with `player` or
+`com.broadsign.suite.bsp.resource_id`; the client forwards that query parameter
+to the gateway. Optional: `direction=D` (default) or `A`, `refresh=180` (seconds).
 
 ## Local examples
 

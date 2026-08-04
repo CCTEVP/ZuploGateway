@@ -59,7 +59,7 @@ in [INFRASTRUCTURE.md](INFRASTRUCTURE.md).
 | --- | --- |
 | S-1 | Portrait **1080×1920** HTML sample under `samples/v1/`. |
 | S-2 | Split assets: HTML, CSS, JS. |
-| S-3 | Do **not** call Zuplo at runtime; load `./../../bsp/sync/bmonorway/flightsdata.js`. |
+| S-3 | Call `/flights/norway` at runtime; read `player` or `com.broadsign.suite.bsp.resource_id` from the page URL and append to the request. |
 | S-4 | Display next departure/arrival from that local payload (city, schedule, ETA/ETD, status). |
 
 ## 3. Non-functional requirements
@@ -86,4 +86,4 @@ in [INFRASTRUCTURE.md](INFRASTRUCTURE.md).
 - [ ] `/flights/norway?player=<test id>` returns gate-filtered departures for OSL demo gates.
 - [ ] `gate` + `player` together returns `gate_and_player_conflict`.
 - [ ] Weather without `OPENWEATHER_API_KEY` fails with configuration error.
-- [ ] `samples/v1` renders when `flightsdata.js` defines `data = {...};`.
+- [ ] `samples/v1` loads live flight data when `player` or `com.broadsign.suite.bsp.resource_id` is on the URL.

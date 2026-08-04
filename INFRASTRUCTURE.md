@@ -94,12 +94,12 @@ They are not loaded from an external DB.
 
 | Component | Hosting | Data path |
 | --- | --- | --- |
-| Signage sample `samples/v1/` | Local / Broadsign package | Static `bsp/sync/bmonorway/flightsdata.js` |
+| Signage sample `samples/v1/` | Docs portal `/samples/v1/` | Live `/flights/norway` (JS `data = {...};` via script tag) |
 | Live gateway | Zuplo edge | Queried by sync jobs (manual or automated download) |
 
-Gateway routes use `corsPolicy: "none"`. Browser demos that need cross-origin
-`fetch` would require a CORS policy change; the v1 sample avoids that by using a
-pre-downloaded JS file (`data = {...};`).
+Gateway routes use `corsPolicy: "none"`. The v1 sample loads the default JS
+response (`data = {...};`) with a dynamic script tag so it works cross-origin
+without CORS.
 
 ## 7. Developer portal
 
@@ -136,6 +136,6 @@ required until a third country or second flights provider appears.
 1. Connect Git repo to Zuplo project.
 2. Set `OPENWEATHER_API_KEY` in each deployed environment.
 3. Deploy / push; verify `/weather/norway` and `/flights/norway` with a test player.
-4. For signage: download flights JS into `bsp/sync/bmonorway/flightsdata.js` on the
-   player/CMS sync path.
+4. For signage demo: open `/samples/v1/index.html?com.broadsign.suite.bsp.resource_id=759244535`
+   in the docs portal (or host `docs/public/samples/v1/` elsewhere).
 5. Optionally publish the Zudoku portal from `docs/`.

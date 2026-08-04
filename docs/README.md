@@ -15,8 +15,9 @@ Players live in `modules/players/` (`sweden`, `norway`, plus shared `test`
 merged into every country). Flights use Avinor; weather uses OpenWeather
 (`OPENWEATHER_API_KEY`).
 
-Signage sample: `samples/v1/` (loads local
-`bsp/sync/bmonorway/flightsdata.js`, not the live API).
+Signage sample: `/samples/v1/` in the docs portal (source in `samples/v1/` and
+`docs/public/samples/v1/`). Loads live `/flights/norway` from the gateway using
+`player` or `com.broadsign.suite.bsp.resource_id` from the page URL.
 
 See the root [README.md](../README.md), [REQUIREMENTS.md](../REQUIREMENTS.md),
 [INFRASTRUCTURE.md](../INFRASTRUCTURE.md), and portal pages:

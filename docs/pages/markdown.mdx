@@ -88,16 +88,10 @@ With `format=json`:
 
 ## Sample client
 
-Save a flights JS response to:
+The **1080×1920** board is at `/samples/v1/index.html` in the docs portal.
+It calls the live gateway and forwards `player` or
+`com.broadsign.suite.bsp.resource_id` from the page URL, for example:
 
 ```text
-bsp/sync/bmonorway/flightsdata.js
+/samples/v1/index.html?com.broadsign.suite.bsp.resource_id=759244535&direction=D
 ```
-
-as:
-
-```javascript
-data = { /* paste Zuplo /flights/norway body */ };
-```
-
-Then open `samples/v1/index.html` (1080×1920 board).

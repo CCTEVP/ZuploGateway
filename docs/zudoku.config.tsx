@@ -48,6 +48,11 @@ const config: ZudokuConfig = {
           items: [
             {
               type: "link",
+              label: "Flights sample (1080×1920)",
+              to: "/samples/v1/index.html",
+            },
+            {
+              type: "link",
               label: "Zuplo Docs",
               to: "https://zuplo.com/docs/dev-portal/introduction",
             },

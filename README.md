@@ -141,28 +141,30 @@ GET /weather/sweden?player=582607705&format=json
 
 ## Sample client (`samples/v1`)
 
-1080×1920 portrait signage board:
+1080×1920 portrait signage board, also served from the docs portal at
+`/samples/v1/index.html`:
 
 | File | Role |
 | --- | --- |
 | `index.html` | Markup |
 | `styles.css` | Layout |
-| `app.js` | Renders next departure/arrival from local data |
+| `app.js` | Loads gateway data and renders next departure/arrival |
 
-Data is **not** fetched from Zuplo at runtime. The HTML loads:
+At runtime the sample reads `player` or `com.broadsign.suite.bsp.resource_id`
+from the page URL and requests:
 
 ```text
-./../../bsp/sync/bmonorway/flightsdata.js
+https://dynode-main-8eca196.zuplo.app/flights/norway?com.broadsign.suite.bsp.resource_id=759244535
 ```
 
-That file should define the Zuplo JS response shape, e.g.:
+Example docs URL:
 
-```js
-data = { "iata": "OSL", "direction": "D", "gate": "D1", "flights": [/* ... */], ... };
+```text
+/samples/v1/index.html?com.broadsign.suite.bsp.resource_id=759244535&direction=D
 ```
 
-Download/sync a `/flights/norway` response into that path as needed. Optional
-query: `?direction=A` or `?direction=D` to force labels.
+Optional query: `direction=A` or `D`, `refresh=180` (seconds), `api=` (override
+gateway base URL).
 
 ## Project layout (key paths)
 
