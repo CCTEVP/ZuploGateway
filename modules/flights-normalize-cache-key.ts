@@ -19,6 +19,7 @@ function getIataOverride(url: URL) {
 
 export default async function (request: ZuploRequest, context: ZuploContext) {
   const url = new URL(request.url);
+  const gate = url.searchParams.get("gate")?.trim();
   const playerLookupValue = getPlayerLookupValue(url.searchParams);
   const cacheVersion = await getCacheVersion(FLIGHTS_CACHE_NAMESPACE, context);
 
