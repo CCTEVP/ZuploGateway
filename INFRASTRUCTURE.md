@@ -136,6 +136,6 @@ required until a third country or second flights provider appears.
 1. Connect Git repo to Zuplo project.
 2. Set `OPENWEATHER_API_KEY` in each deployed environment.
 3. Deploy / push; verify `/weather/norway` and `/flights/norway` with a test player.
-4. For signage demo: open `/samples/v1/index.html?com.broadsign.suite.bsp.resource_id=759244535`
+4. For signage demo: open `/samples/v1/index.html?resource_id=759244535`
    in the docs portal (or host `docs/public/samples/v1/` elsewhere).
 5. Optionally publish the Zudoku portal from `docs/`.

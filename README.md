@@ -1,7 +1,7 @@
 ## Dynode (Zuplo Gateway)
 
 Zuplo-managed edge API that serves **weather** (OpenWeather) and **Norway
-flights** (Avinor), keyed by Broadsign player datasets.
+flights** (Avinor), keyed by player datasets.
 
 Created with [`create-zuplo-api`](https://zuplo.com/docs).
 
@@ -71,6 +71,7 @@ Country files under `modules/players/`:
 | --- | --- |
 | `sweden.ts` | `/weather/sweden` |
 | `norway.ts` | `/weather/norway`, `/flights/norway` |
+| `poland.ts` | `/weather/poland` |
 | `test.ts` | Merged into **every** country lookup (demo/QA players) |
 
 Shared helper: `createCountryPlayerLookup(countryRecords, testPlayerRecords)`.
@@ -90,7 +91,7 @@ Demo/QA player IDs (always available):
 Player id query aliases (weather + flights):
 
 - `player`
-- `com.broadsign.suite.bsp.resource_id`
+- `resource_id`
 
 ## Weather
 
@@ -101,8 +102,9 @@ Shared OpenWeather handler; country-specific player datasets and caches
 | --- | --- | --- |
 | `GET /weather/sweden` | Sweden + test | `POST /weather/sweden/reset` |
 | `GET /weather/norway` | Norway + test | `POST /weather/norway/reset` |
+| `GET /weather/poland` | Poland + test | `POST /weather/poland/reset` |
 
-Parameters: `latlon`, `player` / `com.broadsign.suite.bsp.resource_id`,
+Parameters: `latlon`, `player` / `resource_id`,
 `debug`, `format=json`, `filter=false`.
 
 Default body is JavaScript: `data = {...};`.
@@ -137,6 +139,7 @@ GET /flights/norway?player=582309742&format=json
 GET /flights/norway?gate=D9&iata=OSL&direction=D&format=json
 GET /weather/norway?player=582309742&format=json
 GET /weather/sweden?player=582607705&format=json
+GET /weather/poland?player=963988113&format=json
 ```
 
 ## Sample client (`samples/v1`)
@@ -150,17 +153,17 @@ GET /weather/sweden?player=582607705&format=json
 | `styles.css` | Layout |
 | `app.js` | Loads gateway data and renders next departure/arrival |
 
-At runtime the sample reads `player` or `com.broadsign.suite.bsp.resource_id`
+At runtime the sample reads `player` or `resource_id`
 from the page URL and requests:
 
 ```text
-https://dynode-main-8eca196.zuplo.app/flights/norway?com.broadsign.suite.bsp.resource_id=759244535
+https://dynode-main-8eca196.zuplo.app/flights/norway?resource_id=759244535
 ```
 
 Example docs URL:
 
 ```text
-/samples/v1/index.html?com.broadsign.suite.bsp.resource_id=759244535&direction=D
+/samples/v1/index.html?resource_id=759244535&direction=D
 ```
 
 Optional query: `direction=A` or `D`, `refresh=180` (seconds), `api=` (override

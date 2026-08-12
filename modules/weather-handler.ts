@@ -5,6 +5,10 @@ import {
   ZuploRequest,
 } from "@zuplo/runtime";
 import { bumpCacheVersion, getCacheVersion } from "./cache-version";
+import {
+  getPlayerLookupValue,
+  clearPlayerLookupParams,
+} from "./player-query-params";
 import type { PlayerLookup } from "./players/types";
 import {
   buildFormattedResponse,
@@ -33,11 +37,7 @@ export function createWeatherTransform(players: PlayerLookup) {
     const debug = url.searchParams.get("debug");
     const filter = url.searchParams.get("filter");
     const format = url.searchParams.get("format");
-    const player = url.searchParams.get("player")?.trim();
-    const resourceId = url.searchParams
-      .get("com.broadsign.suite.bsp.resource_id")
-      ?.trim();
-    const locationLookupValue = player || resourceId;
+    const locationLookupValue = getPlayerLookupValue(url.searchParams);
     const showDebug = debug === "true";
 
     const formatCheck = parseFormatParam(format);
@@ -72,7 +72,7 @@ export function createWeatherTransform(players: PlayerLookup) {
 
     if (!latlon) {
       return new Response(
-        "Missing required query parameter: latlon, player, or com.broadsign.suite.bsp.resource_id",
+        "Missing required query parameter: latlon, player, or resource_id",
         {
           status: 400,
         },
@@ -152,12 +152,8 @@ export function createWeatherNormalizeCacheKey(
     context: ZuploContext,
   ) {
     const url = new URL(request.url);
-    const player = url.searchParams.get("player")?.trim();
-    const resourceId = url.searchParams
-      .get("com.broadsign.suite.bsp.resource_id")
-      ?.trim();
+    const locationLookupValue = getPlayerLookupValue(url.searchParams);
     const latlon = url.searchParams.get("latlon");
-    const locationLookupValue = player || resourceId;
     const cacheVersion = await getCacheVersion(cacheNamespace, context);
 
     if (locationLookupValue) {
@@ -175,8 +171,7 @@ export function createWeatherNormalizeCacheKey(
         `${match.latitude.toFixed(3)},${match.longitude.toFixed(3)}`,
       );
       url.searchParams.set("cacheVersion", cacheVersion);
-      url.searchParams.delete("player");
-      url.searchParams.delete("com.broadsign.suite.bsp.resource_id");
+      clearPlayerLookupParams(url.searchParams);
 
       return new ZuploRequest(url, request);
     }
@@ -201,8 +196,7 @@ export function createWeatherNormalizeCacheKey(
       `${parseFloat(rawLat).toFixed(3)},${parseFloat(rawLon).toFixed(3)}`,
     );
     url.searchParams.set("cacheVersion", cacheVersion);
-    url.searchParams.delete("player");
-    url.searchParams.delete("com.broadsign.suite.bsp.resource_id");
+    clearPlayerLookupParams(url.searchParams);
 
     return new ZuploRequest(url, request);
   };

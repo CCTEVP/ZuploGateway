@@ -1,12 +1,12 @@
 # Requirements
 
-Product and technical requirements for **Dynode** (Zuplo gateway for Broadsign
+Product and technical requirements for **Dynode** (Zuplo gateway for
 players). Operational how-to lives in [README.md](README.md); deployment detail
 in [INFRASTRUCTURE.md](INFRASTRUCTURE.md).
 
 ## 1. Goals
 
-- Expose edge APIs that resolve **Broadsign player IDs** (or explicit coords /
+- Expose edge APIs that resolve **player IDs** (or explicit coords /
   gates) to **weather** and **flight** data suitable for digital signage.
 - Keep country-specific player data maintainable in-repo (and in the Zuplo
   editor).
@@ -18,7 +18,7 @@ in [INFRASTRUCTURE.md](INFRASTRUCTURE.md).
 
 | ID | Requirement |
 | --- | --- |
-| P-1 | Accept Broadsign player id via `player` or `com.broadsign.suite.bsp.resource_id`. |
+| P-1 | Accept player id via `player` or `resource_id`. |
 | P-2 | Player datasets are **country-scoped** (`sweden`, `norway`, …). |
 | P-3 | Shared **test/demo** players (`modules/players/test.ts`) are merged into every country lookup. |
 | P-4 | Flights players may include optional `Gate` and `IATA`. |
@@ -59,7 +59,7 @@ in [INFRASTRUCTURE.md](INFRASTRUCTURE.md).
 | --- | --- |
 | S-1 | Portrait **1080×1920** HTML sample under `samples/v1/`. |
 | S-2 | Split assets: HTML, CSS, JS. |
-| S-3 | Call `/flights/norway` at runtime; read `player` or `com.broadsign.suite.bsp.resource_id` from the page URL and append to the request. |
+| S-3 | Call `/flights/norway` at runtime; read `player` or `resource_id` from the page URL and append to the request. |
 | S-4 | Display next departure/arrival from that local payload (city, schedule, ETA/ETD, status). |
 
 ## 3. Non-functional requirements
@@ -86,4 +86,4 @@ in [INFRASTRUCTURE.md](INFRASTRUCTURE.md).
 - [ ] `/flights/norway?player=<test id>` returns gate-filtered departures for OSL demo gates.
 - [ ] `gate` + `player` together returns `gate_and_player_conflict`.
 - [ ] Weather without `OPENWEATHER_API_KEY` fails with configuration error.
-- [ ] `samples/v1` loads live flight data when `player` or `com.broadsign.suite.bsp.resource_id` is on the URL.
+- [ ] `samples/v1` loads live flight data when `player` or `resource_id` is on the URL.

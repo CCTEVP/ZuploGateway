@@ -1,5 +1,5 @@
 export type PlayerSourceRecord = {
-  BroadsignPlayerID: number;
+  PlayerID: number;
   Latitude: number;
   Longitude: number;
   /** Optional airport gate for flights endpoints (e.g. "A4"). */
@@ -7,7 +7,7 @@ export type PlayerSourceRecord = {
   /** Optional IATA airport code for flights endpoints (e.g. "OSL", "BGO"). */
   IATA?: string;
   DisplayUnitsID?: number;
-  BroadsignDisplayUnitID?: number;
+  DisplayUnitID?: number;
   FrameID?: number;
   PanelsID?: number;
   IDSFaceID?: number;
@@ -39,12 +39,12 @@ export function mergePlayerRecords(
   sharedRecords: PlayerSourceRecord[],
 ): PlayerSourceRecord[] {
   const countryIds = new Set(
-    countryRecords.map((record) => record.BroadsignPlayerID),
+    countryRecords.map((record) => record.PlayerID),
   );
   return [
     ...countryRecords,
     ...sharedRecords.filter(
-      (record) => !countryIds.has(record.BroadsignPlayerID),
+      (record) => !countryIds.has(record.PlayerID),
     ),
   ];
 }
@@ -53,9 +53,7 @@ export function createPlayerLookup(
   records: PlayerSourceRecord[],
 ): PlayerLookup {
   function findSourceRecord(playerId: string) {
-    return records.find(
-      (item) => String(item.BroadsignPlayerID) === playerId,
-    );
+    return records.find((item) => String(item.PlayerID) === playerId);
   }
 
   function findPlayer(playerId: string): PlayerRecord | undefined {
@@ -69,7 +67,7 @@ export function createPlayerLookup(
     const iata = record.IATA?.trim().toUpperCase();
 
     return {
-      playerId: String(record.BroadsignPlayerID),
+      playerId: String(record.PlayerID),
       latitude: record.Latitude,
       longitude: record.Longitude,
       ...(gate ? { gate } : {}),

@@ -2,13 +2,13 @@ import { createPlayerLookup, type PlayerSourceRecord } from "./types";
 
 /**
  * Shared demo/QA players available on every country endpoint.
- * Prefer this over copying the same Broadsign IDs into each country file.
+ * Prefer this over copying the same player IDs into each country file.
  */
 export const testPlayerRecords: PlayerSourceRecord[] = [
   {
-    BroadsignPlayerID: 759244535,
+    PlayerID: 759244535,
     DisplayUnitsID: 255,
-    BroadsignDisplayUnitID: 561903924,
+    DisplayUnitID: 561903924,
     FrameID: 561903926,
     PanelsID: 151905,
     IDSFaceID: 42053,
@@ -22,9 +22,9 @@ export const testPlayerRecords: PlayerSourceRecord[] = [
     IATA: "OSL",
   },
   {
-    BroadsignPlayerID: 582309742,
+    PlayerID: 582309742,
     DisplayUnitsID: 254,
-    BroadsignDisplayUnitID: 561903922,
+    DisplayUnitID: 561903922,
     FrameID: 561903926,
     PanelsID: 151905,
     IDSFaceID: 42053,

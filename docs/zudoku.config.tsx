@@ -18,7 +18,7 @@ const config: ZudokuConfig = {
   metadata: {
     title: "Dynode Gateway",
     description:
-      "Weather and Norway flights API gateway (OpenWeather + Avinor) for Broadsign players.",
+      "Weather and Norway flights API gateway (OpenWeather + Avinor) for players.",
   },
   navigation: [
     {

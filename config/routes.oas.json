@@ -3,7 +3,7 @@
   "info": {
     "version": "1.0.0",
     "title": "Dynode Gateway",
-    "description": "Weather (OpenWeather) and Norway flights (Avinor) for Broadsign players."
+    "description": "Weather (OpenWeather) and Norway flights (Avinor) for players in Sweden, Norway, and Poland."
   },
   "paths": {
     "/weather/sweden/reset": {
@@ -47,16 +47,16 @@
             "schema": {
               "type": "string"
             },
-            "description": "A Broadsign player ID resolved from the Sweden player dataset. Optional when latlon is provided."
+            "description": "A player ID resolved from the dataset. Optional when latlon is provided."
           },
           {
-            "name": "com.broadsign.suite.bsp.resource_id",
+            "name": "resource_id",
             "in": "query",
             "required": false,
             "schema": {
               "type": "string"
             },
-            "description": "An alias of player that resolves the same Broadsign player ID from the Sweden dataset."
+            "description": "An alias of player that resolves the same player ID from the dataset."
           },
           {
             "name": "debug",
@@ -142,16 +142,16 @@
             "schema": {
               "type": "string"
             },
-            "description": "A Broadsign player ID resolved from the Norway player dataset. Optional when latlon is provided."
+            "description": "A player ID resolved from the dataset. Optional when latlon is provided."
           },
           {
-            "name": "com.broadsign.suite.bsp.resource_id",
+            "name": "resource_id",
             "in": "query",
             "required": false,
             "schema": {
               "type": "string"
             },
-            "description": "An alias of player that resolves the same Broadsign player ID from the Norway dataset."
+            "description": "An alias of player that resolves the same player ID from the dataset."
           },
           {
             "name": "debug",
@@ -191,6 +191,101 @@
           "handler": {
             "export": "default",
             "module": "$import(./modules/weather-norway-transform)"
+          }
+        },
+        "tags": ["Weather"]
+      }
+    },
+    "/weather/poland/reset": {
+      "post": {
+        "summary": "Reset Poland weather cache",
+        "description": "Invalidates the Poland weather cache by bumping the internal cache version used in weather request cache keys.",
+        "responses": {
+          "200": {
+            "description": "Poland weather cache reset successfully"
+          }
+        },
+        "operationId": "reset-weather-poland-cache",
+        "x-zuplo-route": {
+          "corsPolicy": "none",
+          "handler": {
+            "export": "default",
+            "module": "$import(./modules/weather-poland-reset)"
+          }
+        },
+        "tags": ["Weather"]
+      }
+    },
+    "/weather/poland": {
+      "get": {
+        "summary": "Poland weather",
+        "description": "Resolves coordinates from the Poland player dataset (or latlon) and returns OpenWeather data.",
+        "parameters": [
+          {
+            "name": "latlon",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The raw comma-separated coordinates (e.g., 52.2370415,20.979166). Optional when player is provided."
+          },
+          {
+            "name": "player",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "A player ID resolved from the dataset. Optional when latlon is provided."
+          },
+          {
+            "name": "resource_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "An alias of player that resolves the same player ID from the dataset."
+          },
+          {
+            "name": "debug",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["true", "false"]
+            },
+            "description": "Optional debug flag. When set to true, the response includes a debug object with the original upstream OpenWeather URL, with the appid value masked."
+          },
+          {
+            "name": "format",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["json"]
+            },
+            "description": "Optional response format. By default returns JavaScript as data = {...};. Use format=json to return raw JSON."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A successful weather data response"
+          }
+        },
+        "operationId": "get-weather-poland",
+        "x-zuplo-route": {
+          "corsPolicy": "none",
+          "policies": {
+            "inbound": [
+              "weather-poland-normalize-cache-key",
+              "weather-poland-cache-inbound"
+            ]
+          },
+          "handler": {
+            "export": "default",
+            "module": "$import(./modules/weather-poland-transform)"
           }
         },
         "tags": ["Weather"]
@@ -237,16 +332,16 @@
             "schema": {
               "type": "string"
             },
-            "description": "A Broadsign player ID resolved to Gate and IATA from the Norway player dataset. Mutually exclusive with gate."
+            "description": "A player ID resolved to gate and IATA from the Norway player dataset. Mutually exclusive with gate."
           },
           {
-            "name": "com.broadsign.suite.bsp.resource_id",
+            "name": "resource_id",
             "in": "query",
             "required": false,
             "schema": {
               "type": "string"
             },
-            "description": "An alias of player that resolves the same Broadsign player ID. Mutually exclusive with gate."
+            "description": "An alias of player that resolves the same player ID. Mutually exclusive with gate."
           },
           {
             "name": "iata",

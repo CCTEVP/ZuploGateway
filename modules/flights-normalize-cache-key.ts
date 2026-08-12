@@ -1,6 +1,10 @@
 import { ZuploContext, ZuploRequest } from "@zuplo/runtime";
 import { AVINOR_DEFAULTS } from "./avinor-xml";
 import { getCacheVersion } from "./cache-version";
+import {
+  getPlayerLookupValue,
+  clearPlayerLookupParams,
+} from "./player-query-params";
 import { norwayPlayers } from "./players/norway";
 
 const FLIGHTS_CACHE_NAMESPACE = "flights-norway-cache";
@@ -15,12 +19,7 @@ function getIataOverride(url: URL) {
 
 export default async function (request: ZuploRequest, context: ZuploContext) {
   const url = new URL(request.url);
-  const player = url.searchParams.get("player")?.trim();
-  const resourceId = url.searchParams
-    .get("com.broadsign.suite.bsp.resource_id")
-    ?.trim();
-  const gate = url.searchParams.get("gate")?.trim();
-  const playerLookupValue = player || resourceId;
+  const playerLookupValue = getPlayerLookupValue(url.searchParams);
   const cacheVersion = await getCacheVersion(FLIGHTS_CACHE_NAMESPACE, context);
 
   // Leave conflicting or incomplete requests untouched so the handler returns
@@ -50,8 +49,7 @@ export default async function (request: ZuploRequest, context: ZuploContext) {
     url.searchParams.delete("airport");
     url.searchParams.set("direction", direction);
     url.searchParams.set("cacheVersion", cacheVersion);
-    url.searchParams.delete("player");
-    url.searchParams.delete("com.broadsign.suite.bsp.resource_id");
+    clearPlayerLookupParams(url.searchParams);
 
     return new ZuploRequest(url, request);
   }
@@ -70,8 +68,7 @@ export default async function (request: ZuploRequest, context: ZuploContext) {
   url.searchParams.delete("airport");
   url.searchParams.set("direction", direction);
   url.searchParams.set("cacheVersion", cacheVersion);
-  url.searchParams.delete("player");
-  url.searchParams.delete("com.broadsign.suite.bsp.resource_id");
+  clearPlayerLookupParams(url.searchParams);
 
   return new ZuploRequest(url, request);
 }

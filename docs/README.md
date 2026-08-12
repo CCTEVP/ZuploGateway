@@ -17,7 +17,7 @@ merged into every country). Flights use Avinor; weather uses OpenWeather
 
 Signage sample: `/samples/v1/` in the docs portal (source in `samples/v1/` and
 `docs/public/samples/v1/`). Loads live `/flights/norway` from the gateway using
-`player` or `com.broadsign.suite.bsp.resource_id` from the page URL.
+`player` or `resource_id` from the page URL.
 
 See the root [README.md](../README.md), [REQUIREMENTS.md](../REQUIREMENTS.md),
 [INFRASTRUCTURE.md](../INFRASTRUCTURE.md), and portal pages:

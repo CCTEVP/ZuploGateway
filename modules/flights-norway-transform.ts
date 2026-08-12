@@ -6,18 +6,11 @@ import {
 } from "./avinor-xml";
 import { norwayPlayers } from "./players/norway";
 import type { PlayerSourceRecord } from "./players/types";
+import { getPlayerLookupValue } from "./player-query-params";
 import {
   buildFormattedResponse,
   buildStandardErrorResponse,
 } from "./response-format";
-
-function getPlayerLookupValue(url: URL) {
-  const player = url.searchParams.get("player")?.trim();
-  const resourceId = url.searchParams
-    .get("com.broadsign.suite.bsp.resource_id")
-    ?.trim();
-  return player || resourceId || undefined;
-}
 
 function getIataOverride(url: URL) {
   return (
@@ -35,7 +28,7 @@ export default async function (request: ZuploRequest, context: ZuploContext) {
   const showDebug = debug === "true";
 
   const gateParam = url.searchParams.get("gate")?.trim();
-  const playerLookupValue = getPlayerLookupValue(url);
+  const playerLookupValue = getPlayerLookupValue(url.searchParams);
   const directionParam = url.searchParams.get("direction")?.trim().toUpperCase();
   const iataOverride = getIataOverride(url);
 
@@ -53,7 +46,7 @@ export default async function (request: ZuploRequest, context: ZuploContext) {
       format,
       error: "missing_required_parameter",
       message:
-        "Missing required query parameter: gate, player, or com.broadsign.suite.bsp.resource_id",
+        "Missing required query parameter: gate, player, or resource_id",
     });
   }
 

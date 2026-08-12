@@ -43,6 +43,27 @@
       }
     },
     {
+      "name": "weather-poland-normalize-cache-key",
+      "policyType": "custom-code-inbound",
+      "handler": {
+        "export": "default",
+        "module": "$import(./modules/weather-poland-normalize-cache-key)",
+        "options": {}
+      }
+    },
+    {
+      "name": "weather-poland-cache-inbound",
+      "policyType": "caching-inbound",
+      "handler": {
+        "export": "CachingInboundPolicy",
+        "module": "$import(@zuplo/runtime)",
+        "options": {
+          "expirationSecondsTtl": 3600,
+          "statusCodes": [200]
+        }
+      }
+    },
+    {
       "name": "flights-normalize-cache-key",
       "policyType": "custom-code-inbound",
       "handler": {
