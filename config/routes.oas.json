@@ -344,7 +344,7 @@
     "/flights/norway": {
       "get": {
         "summary": "Norway flight information by gate",
-        "description": "Returns Avinor flight data filtered by gate at a Norwegian airport. Two lookup modes: (1) direct — `gates` with optional `iata` (default OSL); (2) player — `player` or `resource_id` resolved from the Norway dataset. Modes are mutually exclusive. Default direction is AD (arrivals and departures). Gates accepts a single code, comma-separated list, dot notation (e.g. C2.C3), or * for all gates.",
+        "description": "Returns Avinor flight data filtered by gate at a Norwegian airport. Two lookup modes: (1) direct — `gates` with optional `iata`, or `iata` alone for all gates at that airport; (2) player — `player` or `resource_id` resolved from the Norway dataset. Modes are mutually exclusive. Default direction is AD (arrivals and departures). Gates accepts a single code, comma-separated list, dot notation (e.g. C2.C3), or * for all gates.",
         "parameters": [
           {
             "name": "gates",
@@ -380,7 +380,7 @@
             "schema": {
               "type": "string"
             },
-            "description": "Direct lookup: IATA airport code (e.g. OSL, BGO). Used with `gates`; defaults to OSL when omitted. Alias: airport."
+            "description": "Direct lookup: IATA airport code (e.g. OSL, BGO). With `gates`, selects the airport (defaults to OSL when omitted). Without `gates`, returns all gates at this airport. Alias: airport."
           },
           {
             "name": "airport",

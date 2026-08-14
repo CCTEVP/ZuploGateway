@@ -92,13 +92,13 @@ Default filtered weather fields: `coord`, `main.temp`, `weather[0].main`,
 
 Two lookup modes — **never combine them**:
 
-1. **Direct** — `gates` with optional `iata` (defaults to `OSL`)
+1. **Direct** — `gates` with optional `iata`, or `iata` alone for all gates at that airport
 2. **Player** — `player` or `resource_id` (resolves gates + IATA from the Norway dataset)
 
 | Parameter | Description |
 | --- | --- |
 | `gates` | Gate code, comma-separated list, dot notation (`C2.C3`), or `*` for all gates. Legacy alias: `gate`. |
-| `iata` | Airport code for direct lookup (default `OSL`). Alias: `airport`. |
+| `iata` | Airport code. With `gates`, defaults to `OSL` when omitted. Without `gates`, returns all gates at this airport. Alias: `airport`. |
 | `player` / `resource_id` | Player lookup from Norway (+ test) dataset |
 | `direction` | `AD` both (default), `A` arrivals, or `D` departures |
 | `format=json` | Raw JSON instead of default JavaScript |
@@ -129,7 +129,7 @@ It loads flight data from the live gateway, forwarding query parameters from the
 page URL:
 
 - Player lookup: `player` or `resource_id`
-- Direct lookup: `gates` and optional `iata`
+- Direct lookup: `gates` and optional `iata`, or `iata` alone for all gates
 - Optional: `direction` (`AD` default), `refresh` (seconds), `api` (gateway base URL override)
 
 Example:
@@ -148,6 +148,7 @@ GET /weather/poland?player=963988113&format=json
 GET /flights/norway?player=582309742&format=json
 GET /flights/norway?gates=D9&iata=OSL&direction=D&format=json
 GET /flights/norway?gates=C34,C35&iata=BGO&format=json
+GET /flights/norway?iata=BGO&format=json
 POST /weather/norway/reset
 POST /flights/norway/reset
 ```

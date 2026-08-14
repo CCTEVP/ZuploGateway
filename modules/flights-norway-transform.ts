@@ -38,16 +38,16 @@ export default async function (request: ZuploRequest, context: ZuploContext) {
       format,
       error: "gate_and_player_conflict",
       message:
-        "Direct iata/gates lookup and player/resource_id lookup are mutually exclusive. Provide either iata+gates or player/resource_id, not both.",
+        "Direct iata/gates lookup and player/resource_id lookup are mutually exclusive. Provide either iata (optionally with gates) or player/resource_id, not both.",
     });
   }
 
-  if (!gatesParam && !playerLookupValue) {
+  if (!gatesParam && !playerLookupValue && !iataOverride) {
     return buildStandardErrorResponse({
       format,
       error: "missing_required_parameter",
       message:
-        "Missing required query parameter: provide player/resource_id, or gates (with optional iata; defaults to OSL). Example: ?gates=D9&iata=OSL",
+        "Missing required query parameter: provide player/resource_id, gates, or iata. Example: ?gates=D9&iata=OSL or ?iata=BGO (all gates).",
     });
   }
 
@@ -74,6 +74,11 @@ export default async function (request: ZuploRequest, context: ZuploContext) {
   let matchedSourceRecord = context.custom.flightsMatchedSourceRecord as
     | PlayerSourceRecord
     | undefined;
+
+  if (!playerLookupValue && !gatesParam && iataOverride) {
+    gate = "*";
+    iata = iataOverride;
+  }
 
   if (playerLookupValue) {
     matchedSourceRecord =

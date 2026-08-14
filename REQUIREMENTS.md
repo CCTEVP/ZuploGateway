@@ -44,7 +44,7 @@ in [INFRASTRUCTURE.md](INFRASTRUCTURE.md).
 | --- | --- |
 | F-1 | Route: `/flights/norway` (Avinor provider). |
 | F-2 | Direct `gates` lookup and `player` lookup are mutually exclusive. |
-| F-3 | Direct lookup accepts `gates` (+ optional `iata`, default `OSL`); legacy alias `gate`. |
+| F-3 | Direct lookup accepts `gates` (+ optional `iata`, default `OSL`), `iata` alone (all gates), or legacy alias `gate`. |
 | F-4 | `gates` supports single codes, comma-separated lists, dot notation, and `*`. |
 | F-5 | Player without gate configuration → standard error `player_has_no_gate`. |
 | F-6 | Default airport `OSL` when IATA not on player / query. |

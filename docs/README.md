@@ -32,7 +32,7 @@ Norway flights players support multi-gate values (`Gate` field) and optional
 
 ### Flights lookup modes
 
-1. **Direct** — `gates` (+ optional `iata`, default `OSL`)
+1. **Direct** — `gates` (+ optional `iata`), or `iata` alone (all gates at that airport)
 2. **Player** — `player`, `resource_id`, or legacy `com.broadsign.suite.bsp.resource_id`
 
 Modes are mutually exclusive.

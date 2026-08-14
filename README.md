@@ -140,13 +140,13 @@ Default filtered fields: `coord`, `main.temp`, `weather[0].main`, `wind.speed`,
 
 Two lookup modes — never combine them:
 
-1. **Direct** — `gates` with optional `iata` (defaults to `OSL`)
+1. **Direct** — `gates` with optional `iata`, or `iata` alone (all gates at that airport)
 2. **Player** — `player` or `resource_id` (resolves gates + IATA from dataset)
 
 | Parameter | Description |
 | --- | --- |
 | `gates` | Direct lookup: gate code, comma-separated list, dot notation (`C2.C3`), or `*` for all gates. Legacy alias: `gate`. |
-| `iata` | Direct lookup: airport code (default `OSL`). Alias: `airport`. |
+| `iata` | Direct lookup: airport code. With `gates`, defaults to `OSL` when omitted. **Without `gates`, returns all gates at this airport.** Alias: `airport`. |
 | `player` | Player lookup: resolves gate(s) + IATA from Norway (+ test) players. |
 | `resource_id` | Alias of `player`. |
 | `direction` | `AD` both (default), `A` arrivals, or `D` departures. |
@@ -166,6 +166,7 @@ Attribution in responses: “Flight data from Avinor” → [avinor.no](https://
 GET /flights/norway?player=582309742&format=json
 GET /flights/norway?gates=D9&iata=OSL&direction=D&format=json
 GET /flights/norway?gates=C34,C35&iata=BGO&format=json
+GET /flights/norway?iata=BGO&format=json
 GET /weather/norway?player=582309742&format=json
 GET /weather/sweden?player=582607705&format=json
 GET /weather/poland?player=963988113&format=json
@@ -185,7 +186,7 @@ GET /weather/poland?player=963988113&format=json
 At runtime the sample forwards query parameters from the page URL to the gateway:
 
 - Player lookup: `player` or `resource_id`
-- Direct lookup: `gates` and optional `iata`
+- Direct lookup: `gates` and optional `iata`, or `iata` alone for all gates
 
 ```text
 https://dynode-main-8eca196.zuplo.app/flights/norway?resource_id=759244535

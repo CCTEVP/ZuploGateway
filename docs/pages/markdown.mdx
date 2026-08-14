@@ -88,7 +88,7 @@ GET /flights/norway?player=759244535&direction=D&format=json
 GET /flights/norway?resource_id=582309742&format=json
 ```
 
-### Direct lookup (`gates` + optional `iata`)
+### Direct lookup (`gates` + optional `iata`, or `iata` alone)
 
 Single gate:
 
@@ -102,10 +102,16 @@ Multiple gates (comma-separated):
 GET /flights/norway?gates=C34,C35&iata=BGO&format=json
 ```
 
-All gates at an airport:
+All gates at an airport (explicit):
 
 ```http
 GET /flights/norway?gates=*&iata=OSL&format=json
+```
+
+All gates at an airport (`iata` only):
+
+```http
+GET /flights/norway?iata=BGO&format=json
 ```
 
 Legacy `gate` alias (same as `gates`):
@@ -124,9 +130,9 @@ POST /flights/norway/reset
 
 | Parameter | Required | Description |
 | --- | --- | --- |
-| `gates` | One of gates or player | Gate filter(s); comma-separated, dot notation, or `*`. Legacy alias: `gate`. |
-| `iata` | No (direct mode) | Airport code; default `OSL`. Alias: `airport`. |
-| `player` | One of gates or player | Norway player lookup |
+| `gates` | No (direct mode) | Gate filter(s); comma-separated, dot notation, or `*`. Omit with `iata` for all gates. Legacy alias: `gate`. |
+| `iata` | One of gates, iata, or player (direct/player modes) | Airport code. Alone → all gates. With `gates` → defaults to `OSL` when omitted. Alias: `airport`. |
+| `player` | One of gates, iata, or player | Norway player lookup |
 | `resource_id` | Alias | Same as `player` |
 | `direction` | No | `AD` (default), `A`, or `D` |
 | `format=json` | No | JSON response |
@@ -180,7 +186,7 @@ With `format=json`:
 
 | Status | Error code | When |
 | --- | --- | --- |
-| 400 | `missing_required_parameter` | Neither `gates` nor player provided |
+| 400 | `missing_required_parameter` | Neither `gates`, `iata`, nor player provided |
 | 400 | `gate_and_player_conflict` | `gates` and player together |
 | 400 | `invalid_gate` | Unparseable `gates` value |
 | 400 | `invalid_direction` | Direction not `A`, `D`, or `AD` |

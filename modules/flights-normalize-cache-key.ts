@@ -17,6 +17,7 @@ const FLIGHTS_CACHE_NAMESPACE = "flights-norway-cache";
 export default async function (request: ZuploRequest, context: ZuploContext) {
   const url = new URL(request.url);
   const gates = getGatesParam(url.searchParams);
+  const iataParam = getIataParam(url.searchParams);
   const playerLookupValue = getPlayerLookupValue(url.searchParams);
   const cacheVersion = await getCacheVersion(FLIGHTS_CACHE_NAMESPACE, context);
 
@@ -53,14 +54,14 @@ export default async function (request: ZuploRequest, context: ZuploContext) {
     return new ZuploRequest(url, request);
   }
 
-  if (!gates) {
+  if (!gates && !iataParam) {
     return request;
   }
 
-  const iata = getIataParam(url.searchParams) || AVINOR_DEFAULTS.airport;
+  const iata = iataParam || AVINOR_DEFAULTS.airport;
   const direction = normalizeDirectionParam(url.searchParams.get("direction"));
 
-  setNormalizedGatesParam(url.searchParams, gates);
+  setNormalizedGatesParam(url.searchParams, gates || "*");
   url.searchParams.set("iata", iata);
   url.searchParams.delete("airport");
   url.searchParams.set("direction", direction);
