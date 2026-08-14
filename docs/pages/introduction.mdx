@@ -64,7 +64,7 @@ Demo IDs: `759244535` (gate D9 / OSL), `582309742` (gate D1 / OSL).
 ## Flights notes
 
 - Provide **either** `gate` **or** `player` / resource id (not both).
-- `direction=D` (default) or `A`.
+- `direction=AD` (default), `A`, or `D`.
 - `iata` overrides airport (alias `airport`); default player IATA or `OSL`.
 - Flights include `airportName` when Avinor airport names resolve.
 - Departures match player gates more reliably than arrivals.
@@ -81,7 +81,7 @@ https://dynode-main-8eca196.zuplo.app/flights/norway?…
 
 Pass a player on the sample URL with `player` or
 `resource_id`; the client forwards that query parameter
-to the gateway. Optional: `direction=D` (default) or `A`, `refresh=180` (seconds).
+to the gateway. Optional: `direction=AD` (default), `A`, or `D`, `refresh=180` (seconds).
 
 ## Local examples
 

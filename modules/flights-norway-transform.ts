@@ -3,6 +3,8 @@ import {
   AVINOR_DEFAULTS,
   fetchAvinorFlights,
   filterFlightsByGate,
+  isValidDirectionParam,
+  normalizeDirectionParam,
 } from "./avinor-xml";
 import { norwayPlayers } from "./players/norway";
 import type { PlayerSourceRecord } from "./players/types";
@@ -29,7 +31,9 @@ export default async function (request: ZuploRequest, context: ZuploContext) {
 
   const gateParam = url.searchParams.get("gate")?.trim();
   const playerLookupValue = getPlayerLookupValue(url.searchParams);
-  const directionParam = url.searchParams.get("direction")?.trim().toUpperCase();
+  const directionParam = normalizeDirectionParam(
+    url.searchParams.get("direction"),
+  );
   const iataOverride = getIataOverride(url);
 
   if (gateParam && playerLookupValue) {
@@ -50,15 +54,16 @@ export default async function (request: ZuploRequest, context: ZuploContext) {
     });
   }
 
-  if (directionParam && directionParam !== "A" && directionParam !== "D") {
+  if (!isValidDirectionParam(url.searchParams.get("direction"))) {
     return buildStandardErrorResponse({
       format,
       error: "invalid_direction",
-      message: "Invalid direction query parameter. Supported values are A or D.",
+      message:
+        "Invalid direction query parameter. Supported values are A, D, or AD.",
     });
   }
 
-  let gate = gateParam;
+  let gate: string | string[] | undefined = gateParam;
   let iata = iataOverride || AVINOR_DEFAULTS.airport;
   let matchedSourceRecord = context.custom.flightsMatchedSourceRecord as
     | PlayerSourceRecord
@@ -78,7 +83,7 @@ export default async function (request: ZuploRequest, context: ZuploContext) {
       });
     }
 
-    if (!match.gate) {
+    if (!match.allGates && !match.gates?.length) {
       return buildStandardErrorResponse({
         format,
         error: "player_has_no_gate",
@@ -86,11 +91,11 @@ export default async function (request: ZuploRequest, context: ZuploContext) {
       });
     }
 
-    gate = match.gate;
+    gate = match.allGates ? "*" : match.gates;
     iata = match.iata || iataOverride || AVINOR_DEFAULTS.airport;
   }
 
-  const direction = directionParam || AVINOR_DEFAULTS.direction;
+  const direction = directionParam;
 
   const {
     url: upstreamUrl,
@@ -103,14 +108,14 @@ export default async function (request: ZuploRequest, context: ZuploContext) {
     direction,
   });
 
-  const flights = filterFlightsByGate(feed.flights, gate!);
+  const flights = filterFlightsByGate(feed.flights, gate);
   const timestamp = upstreamHeaders.get("date");
 
   const payload: Record<string, unknown> = {
     iata,
     airportCode: iata,
     direction,
-    gate,
+    gate: Array.isArray(gate) && gate.length === 1 ? gate[0] : gate,
     flights,
     attribution: AVINOR_DEFAULTS.attribution,
     timestamp: timestamp

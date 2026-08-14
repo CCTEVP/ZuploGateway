@@ -31,7 +31,7 @@ export type AvinorFeedResult = {
 const AVINOR_XML_FEED_BASE = "https://asrv.avinor.no/XmlFeed/v1.0";
 const AVINOR_AIRPORT_NAMES_URL = "https://asrv.avinor.no/airportNames/v1.0";
 const DEFAULT_AIRPORT = "OSL";
-const DEFAULT_DIRECTION = "D";
+const DEFAULT_DIRECTION = "AD";
 const DEFAULT_TIME_FROM = "1";
 const DEFAULT_TIME_TO = "7";
 
@@ -41,10 +41,29 @@ const AIRPORT_NAME_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
 
 export type AvinorFeedOptions = {
   airport?: string;
+  /** A = arrivals, D = departures, AD = both (fetches and merges A + D). */
   direction?: string;
   timeFrom?: string;
   timeTo?: string;
 };
+
+export function normalizeDirectionParam(
+  value: string | null | undefined,
+): string {
+  const normalized = (value?.trim() || DEFAULT_DIRECTION).toUpperCase();
+  if (normalized === "A" || normalized === "D" || normalized === "AD") {
+    return normalized;
+  }
+  return normalized;
+}
+
+export function isValidDirectionParam(value: string | null | undefined): boolean {
+  if (value == null || value.trim() === "") {
+    return true;
+  }
+  const normalized = value.trim().toUpperCase();
+  return normalized === "A" || normalized === "D" || normalized === "AD";
+}
 
 function getElementText(xml: string, tag: string): string | undefined {
   const match = xml.match(new RegExp(`<${tag}>([^<]*)</${tag}>`, "i"));
@@ -110,24 +129,91 @@ export function parseAvinorXmlFeed(xml: string): AvinorFeedResult {
 
 export function filterFlightsByGate(
   flights: AvinorFlight[],
-  gate: string,
+  gate: string | string[] | undefined,
 ): AvinorFlight[] {
-  const normalizedGate = gate.trim().toUpperCase();
-  return flights.filter(
-    (flight) => flight.gate?.trim().toUpperCase() === normalizedGate,
-  );
+  if (gate == null) {
+    return flights;
+  }
+
+  const gates = (Array.isArray(gate) ? gate : [gate])
+    .flatMap((value) => String(value).split(","))
+    .map((value) => value.trim().toUpperCase())
+    .filter((value) => value && value !== "*");
+
+  if (gates.length === 0) {
+    return flights;
+  }
+
+  const allowed = new Set(gates);
+  return flights.filter((flight) => {
+    const flightGate = flight.gate?.trim().toUpperCase();
+    return flightGate ? allowed.has(flightGate) : false;
+  });
 }
 
 export function buildAvinorFeedUrl(options: AvinorFeedOptions = {}): URL {
   const url = new URL(AVINOR_XML_FEED_BASE);
   url.searchParams.set("airport", (options.airport ?? DEFAULT_AIRPORT).toUpperCase());
+  const direction = normalizeDirectionParam(options.direction);
   url.searchParams.set(
     "direction",
-    (options.direction ?? DEFAULT_DIRECTION).toUpperCase(),
+    direction === "AD" ? "D" : direction,
   );
   url.searchParams.set("TimeFrom", options.timeFrom ?? DEFAULT_TIME_FROM);
   url.searchParams.set("TimeTo", options.timeTo ?? DEFAULT_TIME_TO);
   return url;
+}
+
+async function fetchAvinorFeedSingle(
+  options: AvinorFeedOptions,
+  airportNames: Record<string, string>,
+): Promise<{
+  url: URL;
+  status: number;
+  statusText: string;
+  headers: Headers;
+  feed: AvinorFeedResult;
+}> {
+  const url = buildAvinorFeedUrl(options);
+  const response = await fetch(url.toString());
+  const xml = await readAvinorXml(response);
+  const feed = parseAvinorXmlFeed(xml);
+  feed.flights = enrichFlightsWithAirportNames(feed.flights, airportNames);
+
+  return {
+    url,
+    status: response.status,
+    statusText: response.statusText,
+    headers: response.headers,
+    feed,
+  };
+}
+
+function mergeAvinorFeeds(
+  arrivals: AvinorFeedResult,
+  departures: AvinorFeedResult,
+): AvinorFeedResult {
+  const byId = new Map<string, AvinorFlight>();
+  for (const flight of [...arrivals.flights, ...departures.flights]) {
+    const key =
+      flight.uniqueId ??
+      `${flight.flightId ?? ""}:${flight.scheduleTime ?? ""}:${flight.arrDep ?? ""}`;
+    if (!byId.has(key)) {
+      byId.set(key, flight);
+    }
+  }
+
+  const flights = [...byId.values()].sort((a, b) => {
+    const aTime = a.scheduleTime ? Date.parse(a.scheduleTime) : 0;
+    const bTime = b.scheduleTime ? Date.parse(b.scheduleTime) : 0;
+    return aTime - bTime;
+  });
+
+  return {
+    airportName: departures.airportName ?? arrivals.airportName,
+    lastUpdate: departures.lastUpdate ?? arrivals.lastUpdate,
+    flights,
+  };
 }
 
 function parseAirportNamesXml(xml: string): Record<string, string> {
@@ -188,22 +274,25 @@ export async function fetchAvinorFlights(
   headers: Headers;
   feed: AvinorFeedResult;
 }> {
-  const url = buildAvinorFeedUrl(options);
-  const [response, airportNames] = await Promise.all([
-    fetch(url.toString()),
-    getAvinorAirportNames(),
-  ]);
-  const xml = await readAvinorXml(response);
-  const feed = parseAvinorXmlFeed(xml);
-  feed.flights = enrichFlightsWithAirportNames(feed.flights, airportNames);
+  const direction = normalizeDirectionParam(options.direction);
+  const airportNames = await getAvinorAirportNames();
 
-  return {
-    url,
-    status: response.status,
-    statusText: response.statusText,
-    headers: response.headers,
-    feed,
-  };
+  if (direction === "AD") {
+    const [arrivals, departures] = await Promise.all([
+      fetchAvinorFeedSingle({ ...options, direction: "A" }, airportNames),
+      fetchAvinorFeedSingle({ ...options, direction: "D" }, airportNames),
+    ]);
+
+    return {
+      url: departures.url,
+      status: departures.status,
+      statusText: departures.statusText,
+      headers: departures.headers,
+      feed: mergeAvinorFeeds(arrivals.feed, departures.feed),
+    };
+  }
+
+  return fetchAvinorFeedSingle(options, airportNames);
 }
 
 export const AVINOR_DEFAULTS = {

@@ -1,5 +1,5 @@
 import { ZuploContext, ZuploRequest } from "@zuplo/runtime";
-import { AVINOR_DEFAULTS } from "./avinor-xml";
+import { AVINOR_DEFAULTS, normalizeDirectionParam } from "./avinor-xml";
 import { getCacheVersion } from "./cache-version";
 import {
   getPlayerLookupValue,
@@ -33,7 +33,7 @@ export default async function (request: ZuploRequest, context: ZuploContext) {
     const match = norwayPlayers.findPlayer(playerLookupValue);
     const sourceRecord = norwayPlayers.findSourceRecord(playerLookupValue);
 
-    if (!match || !match.gate) {
+    if (!match || (!match.allGates && !match.gates?.length)) {
       return request;
     }
 
@@ -41,11 +41,12 @@ export default async function (request: ZuploRequest, context: ZuploContext) {
 
     const iata =
       match.iata || getIataOverride(url) || AVINOR_DEFAULTS.airport;
-    const direction =
-      url.searchParams.get("direction")?.trim().toUpperCase() ||
-      AVINOR_DEFAULTS.direction;
+    const direction = normalizeDirectionParam(url.searchParams.get("direction"));
 
-    url.searchParams.set("gate", match.gate);
+    url.searchParams.set(
+      "gate",
+      match.allGates ? "*" : (match.gates ?? []).join(","),
+    );
     url.searchParams.set("iata", iata);
     url.searchParams.delete("airport");
     url.searchParams.set("direction", direction);
@@ -60,9 +61,7 @@ export default async function (request: ZuploRequest, context: ZuploContext) {
   }
 
   const iata = getIataOverride(url) || AVINOR_DEFAULTS.airport;
-  const direction =
-    url.searchParams.get("direction")?.trim().toUpperCase() ||
-    AVINOR_DEFAULTS.direction;
+  const direction = normalizeDirectionParam(url.searchParams.get("direction"));
 
   url.searchParams.set("gate", gate);
   url.searchParams.set("iata", iata);

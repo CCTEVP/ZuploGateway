@@ -46,7 +46,7 @@ in [INFRASTRUCTURE.md](INFRASTRUCTURE.md).
 | F-2 | `gate` and `player` are mutually exclusive. |
 | F-3 | Player without `Gate` → standard error `player_has_no_gate`. |
 | F-4 | Default airport `OSL` when IATA not on player / query. |
-| F-5 | Default `direction=D` (departures); overridable with `A` or `D`. |
+| F-5 | Default `direction=AD` (arrivals + departures); overridable with `A` or `D`. |
 | F-6 | Upstream: public Avinor XmlFeed + airportNames enrichment (`airportName`). |
 | F-7 | Filter flights to the resolved gate. |
 | F-8 | Include Avinor attribution in the payload. |

@@ -121,7 +121,7 @@ Provide **either** `gate` **or** `player` / resource id — never both.
 | `gate` | Gate filter (e.g. `D1`). Mutually exclusive with `player`. |
 | `player` | Resolves `Gate` + `IATA` from Norway (+ test) players. |
 | `iata` | Airport override (default player IATA, else `OSL`). Alias: `airport`. |
-| `direction` | `D` departures (default) or `A` arrivals. |
+| `direction` | `AD` both (default), `A` arrivals, or `D` departures. |
 | `debug` / `format` / `filter` | Same semantics as weather. |
 
 Each flight may include `airportName` (city/airport label from Avinor

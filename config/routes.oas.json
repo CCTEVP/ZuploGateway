@@ -314,7 +314,7 @@
     "/flights/norway": {
       "get": {
         "summary": "Norway flight information by gate",
-        "description": "Returns Avinor flight data for a gate at a Norwegian airport (default OSL). Provide either `gate` or `player` (mutually exclusive). Default direction is departures (D). Player records supply Gate and IATA.",
+        "description": "Returns Avinor flight data for a gate (or player gates) at a Norwegian airport (default OSL). Provide either `gate` or `player` (mutually exclusive). Default direction is AD (arrivals and departures). Player records may supply one gate, several gates, or all gates at the airport.",
         "parameters": [
           {
             "name": "gate",
@@ -323,7 +323,7 @@
             "schema": {
               "type": "string"
             },
-            "description": "Airport gate to filter flights (e.g. A4). Mutually exclusive with player."
+            "description": "Airport gate to filter flights (e.g. A4). Comma-separated values are allowed. Mutually exclusive with player."
           },
           {
             "name": "player",
@@ -367,9 +367,9 @@
             "required": false,
             "schema": {
               "type": "string",
-              "enum": ["A", "D"]
+              "enum": ["A", "D", "AD"]
             },
-            "description": "Flight direction. A = arrivals, D = departures. Defaults to D."
+            "description": "Flight direction. A = arrivals, D = departures, AD = both. Defaults to AD."
           },
           {
             "name": "debug",
