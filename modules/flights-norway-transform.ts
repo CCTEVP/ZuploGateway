@@ -6,6 +6,11 @@ import {
   isValidDirectionParam,
   normalizeDirectionParam,
 } from "./avinor-xml";
+import {
+  gatesFilterFromParam,
+  getGatesParam,
+  getIataParam,
+} from "./flights-query-params";
 import { norwayPlayers } from "./players/norway";
 import type { PlayerSourceRecord } from "./players/types";
 import { getPlayerLookupValue } from "./player-query-params";
@@ -14,14 +19,6 @@ import {
   buildStandardErrorResponse,
 } from "./response-format";
 
-function getIataOverride(url: URL) {
-  return (
-    url.searchParams.get("iata")?.trim().toUpperCase() ||
-    url.searchParams.get("airport")?.trim().toUpperCase() ||
-    undefined
-  );
-}
-
 export default async function (request: ZuploRequest, context: ZuploContext) {
   const url = new URL(request.url);
   const format = url.searchParams.get("format");
@@ -29,28 +26,37 @@ export default async function (request: ZuploRequest, context: ZuploContext) {
   const debug = url.searchParams.get("debug");
   const showDebug = debug === "true";
 
-  const gateParam = url.searchParams.get("gate")?.trim();
+  const gatesParam = getGatesParam(url.searchParams);
   const playerLookupValue = getPlayerLookupValue(url.searchParams);
   const directionParam = normalizeDirectionParam(
     url.searchParams.get("direction"),
   );
-  const iataOverride = getIataOverride(url);
+  const iataOverride = getIataParam(url.searchParams);
 
-  if (gateParam && playerLookupValue) {
+  if (gatesParam && playerLookupValue) {
     return buildStandardErrorResponse({
       format,
       error: "gate_and_player_conflict",
       message:
-        "The gate and player parameters are mutually exclusive. Provide either gate or player, not both.",
+        "Direct iata/gates lookup and player/resource_id lookup are mutually exclusive. Provide either iata+gates or player/resource_id, not both.",
     });
   }
 
-  if (!gateParam && !playerLookupValue) {
+  if (!gatesParam && !playerLookupValue) {
     return buildStandardErrorResponse({
       format,
       error: "missing_required_parameter",
       message:
-        "Missing required query parameter: gate, player, or resource_id",
+        "Missing required query parameter: provide player/resource_id, or gates (with optional iata; defaults to OSL). Example: ?gates=D9&iata=OSL",
+    });
+  }
+
+  if (gatesParam && !gatesFilterFromParam(gatesParam)) {
+    return buildStandardErrorResponse({
+      format,
+      error: "invalid_gate",
+      message:
+        "Invalid gates query parameter. Provide a gate code, comma-separated gate list, or * for all gates.",
     });
   }
 
@@ -63,7 +69,7 @@ export default async function (request: ZuploRequest, context: ZuploContext) {
     });
   }
 
-  let gate: string | string[] | undefined = gateParam;
+  let gate: string | string[] | undefined = gatesFilterFromParam(gatesParam);
   let iata = iataOverride || AVINOR_DEFAULTS.airport;
   let matchedSourceRecord = context.custom.flightsMatchedSourceRecord as
     | PlayerSourceRecord
@@ -115,7 +121,7 @@ export default async function (request: ZuploRequest, context: ZuploContext) {
     iata,
     airportCode: iata,
     direction,
-    gate: Array.isArray(gate) && gate.length === 1 ? gate[0] : gate,
+    gates: Array.isArray(gate) && gate.length === 1 ? gate[0] : gate,
     flights,
     attribution: AVINOR_DEFAULTS.attribution,
     timestamp: timestamp

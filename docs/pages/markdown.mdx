@@ -35,6 +35,8 @@ POST /weather/norway/reset
 
 ## Flights Norway
 
+Player lookup:
+
 ```http
 GET /flights/norway?player=582309742&format=json
 ```
@@ -44,11 +46,17 @@ GET /flights/norway?player=759244535&direction=D&format=json
 ```
 
 ```http
-GET /flights/norway?gate=D1&iata=OSL&direction=D&format=json
+GET /flights/norway?resource_id=582309742&format=json
+```
+
+Direct lookup (`gates` + optional `iata`):
+
+```http
+GET /flights/norway?gates=D1&iata=OSL&direction=D&format=json
 ```
 
 ```http
-GET /flights/norway?resource_id=582309742&format=json
+GET /flights/norway?gates=C34,C35&iata=BGO&format=json
 ```
 
 ```http
@@ -73,7 +81,7 @@ With `format=json`:
 
 - `iata` / `airportCode`
 - `direction`
-- `gate`
+- `gates`
 - `flights[]` — includes `flightId`, `airline`, `scheduleTime`, `airport`,
   `airportName`, `gate`, `beltNumber`, `status`, `delayed`, …
 - `attribution`
@@ -83,15 +91,16 @@ With `format=json`:
 
 | Status | When |
 | --- | --- |
-| 400 | Missing params, `gate`+`player` together, player has no gate, invalid direction/format |
+| 400 | Missing params, `gates`+`player` together, invalid gates, player has no gate, invalid direction/format |
 | 404 | Unknown player id |
 
 ## Sample client
 
 The **1080×1920** board is at `/samples/v1/index.html` in the docs portal.
-It calls the live gateway and forwards `player` or
-`resource_id` from the page URL, for example:
+It calls the live gateway and forwards `player`, `resource_id`, `gates`, and
+`iata` from the page URL, for example:
 
 ```text
 /samples/v1/index.html?resource_id=759244535&direction=D
+/samples/v1/index.html?gates=D9&iata=OSL&direction=D
 ```

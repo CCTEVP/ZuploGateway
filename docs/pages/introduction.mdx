@@ -63,9 +63,12 @@ Demo IDs: `759244535` (gate D9 / OSL), `582309742` (gate D1 / OSL).
 
 ## Flights notes
 
-- Provide **either** `gate` **or** `player` / resource id (not both).
+Two lookup modes (mutually exclusive):
+
+1. **Direct** — `gates` with optional `iata` (default `OSL`). Supports comma-separated gates and `*` for all gates.
+2. **Player** — `player` or `resource_id` resolved from the Norway dataset.
+
 - `direction=AD` (default), `A`, or `D`.
-- `iata` overrides airport (alias `airport`); default player IATA or `OSL`.
 - Flights include `airportName` when Avinor airport names resolve.
 - Departures match player gates more reliably than arrivals.
 
@@ -79,9 +82,10 @@ gateway:
 https://dynode-main-8eca196.zuplo.app/flights/norway?…
 ```
 
-Pass a player on the sample URL with `player` or
-`resource_id`; the client forwards that query parameter
-to the gateway. Optional: `direction=AD` (default), `A`, or `D`, `refresh=180` (seconds).
+Pass a player on the sample URL with `player` or `resource_id`, or use direct
+lookup with `gates` and optional `iata`. The client forwards those query
+parameters to the gateway. Optional: `direction=AD` (default), `A`, or `D`,
+`refresh=180` (seconds).
 
 ## Local examples
 
@@ -89,7 +93,8 @@ to the gateway. Optional: `direction=AD` (default), `A`, or `D`, `refresh=180` (
 GET /weather/norway?player=582309742&format=json
 GET /weather/sweden?player=582607705&format=json
 GET /flights/norway?player=582309742&format=json
-GET /flights/norway?gate=D9&direction=D&format=json
+GET /flights/norway?gates=D9&direction=D&format=json
+GET /flights/norway?gates=C34,C35&iata=BGO&format=json
 POST /flights/norway/reset
 POST /weather/norway/reset
 ```

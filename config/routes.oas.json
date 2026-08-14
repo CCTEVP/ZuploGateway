@@ -314,16 +314,16 @@
     "/flights/norway": {
       "get": {
         "summary": "Norway flight information by gate",
-        "description": "Returns Avinor flight data for a gate (or player gates) at a Norwegian airport (default OSL). Provide either `gate` or `player` (mutually exclusive). Default direction is AD (arrivals and departures). Player records may supply one gate, several gates, or all gates at the airport.",
+        "description": "Returns Avinor flight data filtered by gate at a Norwegian airport. Two lookup modes: (1) direct — `gates` with optional `iata` (default OSL); (2) player — `player` or `resource_id` resolved from the Norway dataset. Modes are mutually exclusive. Default direction is AD (arrivals and departures). Gates accepts a single code, comma-separated list, dot notation (e.g. C2.C3), or * for all gates.",
         "parameters": [
           {
-            "name": "gate",
+            "name": "gates",
             "in": "query",
             "required": false,
             "schema": {
               "type": "string"
             },
-            "description": "Airport gate to filter flights (e.g. A4). Comma-separated values are allowed. Mutually exclusive with player."
+            "description": "Direct lookup: airport gate(s) to filter flights (e.g. D9, C34,C35, or * for all gates). Use with optional `iata`. Mutually exclusive with player/resource_id. Legacy alias: `gate`."
           },
           {
             "name": "player",
@@ -332,7 +332,7 @@
             "schema": {
               "type": "string"
             },
-            "description": "A player ID resolved to gate and IATA from the Norway player dataset. Mutually exclusive with gate."
+            "description": "Player lookup: resolved to gate(s) and IATA from the Norway player dataset. Mutually exclusive with gates."
           },
           {
             "name": "resource_id",
@@ -341,7 +341,7 @@
             "schema": {
               "type": "string"
             },
-            "description": "An alias of player that resolves the same player ID. Mutually exclusive with gate."
+            "description": "Alias of player for player lookup. Mutually exclusive with gates."
           },
           {
             "name": "iata",
@@ -350,7 +350,7 @@
             "schema": {
               "type": "string"
             },
-            "description": "IATA airport code override (e.g. OSL, BGO). Defaults to OSL when omitted and the player has no IATA configured. Alias: airport."
+            "description": "Direct lookup: IATA airport code (e.g. OSL, BGO). Used with `gates`; defaults to OSL when omitted. Alias: airport."
           },
           {
             "name": "airport",

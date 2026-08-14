@@ -8,7 +8,7 @@ const responseFilterConfig = {
       "iata",
       "airportCode",
       "direction",
-      "gate",
+      "gates",
       "flights",
       "attribution",
     ],

@@ -43,7 +43,7 @@ in [INFRASTRUCTURE.md](INFRASTRUCTURE.md).
 | ID | Requirement |
 | --- | --- |
 | F-1 | Route: `/flights/norway` (Avinor provider). |
-| F-2 | `gate` and `player` are mutually exclusive. |
+| F-2 | `gates` and `player` are mutually exclusive. |
 | F-3 | Player without `Gate` → standard error `player_has_no_gate`. |
 | F-4 | Default airport `OSL` when IATA not on player / query. |
 | F-5 | Default `direction=AD` (arrivals + departures); overridable with `A` or `D`. |
@@ -84,6 +84,6 @@ in [INFRASTRUCTURE.md](INFRASTRUCTURE.md).
 
 - [ ] `/weather/sweden` and `/weather/norway` resolve country + test players.
 - [ ] `/flights/norway?player=<test id>` returns gate-filtered departures for OSL demo gates.
-- [ ] `gate` + `player` together returns `gate_and_player_conflict`.
+- [ ] `gates` + `player` together returns `gate_and_player_conflict`.
 - [ ] Weather without `OPENWEATHER_API_KEY` fails with configuration error.
 - [ ] `samples/v1` loads live flight data when `player` or `resource_id` is on the URL.

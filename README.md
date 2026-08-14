@@ -114,13 +114,17 @@ Default body is JavaScript: `data = {...};`.
 `GET /flights/norway` — Avinor XmlFeed, filtered by gate. Cache **180 seconds**
 (Avinor recommends refreshing about every 3 minutes).
 
-Provide **either** `gate` **or** `player` / resource id — never both.
+Two lookup modes — never combine them:
+
+1. **Direct** — `gates` with optional `iata` (defaults to `OSL`)
+2. **Player** — `player` or `resource_id` (resolves gate + IATA from dataset)
 
 | Parameter | Description |
 | --- | --- |
-| `gate` | Gate filter (e.g. `D1`). Mutually exclusive with `player`. |
-| `player` | Resolves `Gate` + `IATA` from Norway (+ test) players. |
-| `iata` | Airport override (default player IATA, else `OSL`). Alias: `airport`. |
+| `gates` | Direct lookup: gate code, comma-separated list, dot notation (`C2.C3`), or `*` for all gates. |
+| `iata` | Direct lookup: airport code (default `OSL`). Alias: `airport`. |
+| `player` | Player lookup: resolves gate(s) + IATA from Norway (+ test) players. |
+| `resource_id` | Alias of `player`. |
 | `direction` | `AD` both (default), `A` arrivals, or `D` departures. |
 | `debug` / `format` / `filter` | Same semantics as weather. |
 
@@ -136,7 +140,8 @@ Attribution in responses: “Flight data from Avinor” → [avinor.no](https://
 
 ```bash
 GET /flights/norway?player=582309742&format=json
-GET /flights/norway?gate=D9&iata=OSL&direction=D&format=json
+GET /flights/norway?gates=D9&iata=OSL&direction=D&format=json
+GET /flights/norway?gates=C34,C35&iata=BGO&format=json
 GET /weather/norway?player=582309742&format=json
 GET /weather/sweden?player=582607705&format=json
 GET /weather/poland?player=963988113&format=json
