@@ -8,93 +8,146 @@ category: ""
 # Dynode Gateway
 
 Edge API on Zuplo for **weather** (OpenWeather) and **Norway flights**
-(Avinor), resolved from player datasets.
+(Avinor), resolved from country player datasets or explicit query parameters.
 
 The [API Reference](/api) is generated from `config/routes.oas.json` and is the
 source of truth for parameter schemas.
+
+**Live gateway:** `https://dynode-main-8eca196.zuplo.app`
 
 ## Endpoints
 
 ### Weather
 
-| Method | Path | Players |
-| --- | --- | --- |
-| GET | `/weather/sweden` | Sweden + shared test |
-| POST | `/weather/sweden/reset` | Cache invalidate |
-| GET | `/weather/norway` | Norway + shared test |
-| POST | `/weather/norway/reset` | Cache invalidate |
-| GET | `/weather/poland` | Poland + shared test |
-| POST | `/weather/poland/reset` | Cache invalidate |
+| Method | Path | Player dataset | Cache TTL |
+| --- | --- | --- | --- |
+| GET | `/weather/sweden` | Sweden + shared test | 1 hour |
+| POST | `/weather/sweden/reset` | — | Invalidate cache |
+| GET | `/weather/norway` | Norway + shared test | 1 hour |
+| POST | `/weather/norway/reset` | — | Invalidate cache |
+| GET | `/weather/poland` | Poland + shared test | 1 hour |
+| POST | `/weather/poland/reset` | — | Invalidate cache |
 
-Weather cache TTL: **1 hour**. Requires `OPENWEATHER_API_KEY`.
+Requires `OPENWEATHER_API_KEY` in the Zuplo environment (or local `.env`).
 
 ### Flights
 
-| Method | Path | Notes |
+| Method | Path | Notes | Cache TTL |
+| --- | --- | --- | --- |
+| GET | `/flights/norway` | Avinor XmlFeed, gate filter | 180 seconds |
+| POST | `/flights/norway/reset` | — | Invalidate cache |
+
+No Avinor API key. Attribution is included in responses.
+
+## Player datasets
+
+Country files under `modules/players/`:
+
+| File | Routes | Notes |
 | --- | --- | --- |
-| GET | `/flights/norway` | Avinor XmlFeed, gate filter |
-| POST | `/flights/norway/reset` | Cache invalidate |
+| `sweden.ts` | `/weather/sweden` | Weather coordinates only |
+| `norway.ts` | `/weather/norway`, `/flights/norway` | Weather + gate/IATA for flights |
+| `poland.ts` | `/weather/poland` | Weather coordinates only |
+| `test.ts` | All country routes | Demo/QA players merged into every lookup |
 
-Flights cache TTL: **180 seconds** (~3 minutes per Avinor guidance). No Avinor API key.
+Norway flight players are maintained from `modules/players/NorwayPlayers.csv`
+via `scripts/update-norway-from-csv.mjs`.
 
-## Player resolution
+### Player id query aliases
 
-Country datasets: `modules/players/sweden.ts`, `modules/players/norway.ts`.
-
-Shared demo/QA players in `modules/players/test.ts` are merged into **every**
-country lookup.
-
-Query aliases for player id:
+All weather and flights routes accept:
 
 - `player`
 - `resource_id`
+- `com.broadsign.suite.bsp.resource_id` (legacy CMS contract)
 
-Optional player fields for flights: `Gate`, `IATA`.
+### Optional player fields (flights)
 
-Demo IDs: `759244535` (gate D9 / OSL), `582309742` (gate D1 / OSL).
+- `Gate` — one gate, several gates (comma-separated or dot notation), or `*` for all gates at the airport
+- `IATA` — airport code (e.g. `OSL`, `BGO`, `TRD`)
+
+Demo/QA player IDs (available on every country endpoint):
+
+| Player ID | Gates | IATA |
+| --- | --- | --- |
+| `759244535` | D9 | OSL |
+| `582309742` | D1 | OSL |
+
+## Weather
+
+Resolve location from **`latlon`** or a **player id** (one is required).
+
+| Parameter | Description |
+| --- | --- |
+| `latlon` | Comma-separated latitude,longitude (rounded to 3 decimals before upstream call) |
+| `player` / `resource_id` | Resolved from the country-specific player dataset |
+| `format=json` | Raw JSON instead of default JavaScript `data = {...};` |
+| `filter=false` | Return full OpenWeather payload instead of the default field allowlist |
+| `debug=true` | Include masked upstream URL and matched player metadata |
+
+Default filtered weather fields: `coord`, `main.temp`, `weather[0].main`,
+`wind.speed`, `rain.1h`.
+
+## Flights (Norway)
+
+Two lookup modes — **never combine them**:
+
+1. **Direct** — `gates` with optional `iata` (defaults to `OSL`)
+2. **Player** — `player` or `resource_id` (resolves gates + IATA from the Norway dataset)
+
+| Parameter | Description |
+| --- | --- |
+| `gates` | Gate code, comma-separated list, dot notation (`C2.C3`), or `*` for all gates. Legacy alias: `gate`. |
+| `iata` | Airport code for direct lookup (default `OSL`). Alias: `airport`. |
+| `player` / `resource_id` | Player lookup from Norway (+ test) dataset |
+| `direction` | `AD` both (default), `A` arrivals, or `D` departures |
+| `format=json` | Raw JSON instead of default JavaScript |
+| `filter=false` | Return full payload instead of the default field allowlist |
+| `debug=true` | Include upstream Avinor URL and feed metadata |
+
+Default filtered flights fields: `iata`, `airportCode`, `direction`, `gates`,
+`flights`, `attribution`.
+
+Each flight may include `airportName` (from Avinor airport names). **Departures**
+match gate filters more reliably than arrivals.
 
 ## Common response behaviour
 
 - Default body: JavaScript `data = {...};`
 - `format=json` for raw JSON
-- `filter=false` bypasses field allowlist
+- `filter=false` bypasses the endpoint field allowlist
 - `debug=true` adds upstream/debug metadata
-- `timestamp` is always present on success payloads
-
-## Flights notes
-
-Two lookup modes (mutually exclusive):
-
-1. **Direct** — `gates` with optional `iata` (default `OSL`). Supports comma-separated gates and `*` for all gates.
-2. **Player** — `player` or `resource_id` resolved from the Norway dataset.
-
-- `direction=AD` (default), `A`, or `D`.
-- Flights include `airportName` when Avinor airport names resolve.
-- Departures match player gates more reliably than arrivals.
+- `timestamp` is present on flights success payloads
+- Weather errors are plain text; flights errors use structured JSON when `format=json`
 
 ## Sample signage client
 
-The **1080×1920** board lives at `/samples/v1/` in the docs portal (source:
-`samples/v1/` and `docs/public/samples/v1/`). It loads flight data from the live
-gateway:
+The **1080×1920** portrait board is linked from this portal at
+`/samples/v1/index.html` (source: `samples/v1/` and `docs/public/samples/v1/`).
+
+It loads flight data from the live gateway, forwarding query parameters from the
+page URL:
+
+- Player lookup: `player` or `resource_id`
+- Direct lookup: `gates` and optional `iata`
+- Optional: `direction` (`AD` default), `refresh` (seconds), `api` (gateway base URL override)
+
+Example:
 
 ```text
-https://dynode-main-8eca196.zuplo.app/flights/norway?…
+/samples/v1/index.html?resource_id=759244535&direction=D
+/samples/v1/index.html?gates=D9&iata=OSL&direction=D
 ```
-
-Pass a player on the sample URL with `player` or `resource_id`, or use direct
-lookup with `gates` and optional `iata`. The client forwards those query
-parameters to the gateway. Optional: `direction=AD` (default), `A`, or `D`,
-`refresh=180` (seconds).
 
 ## Local examples
 
 ```bash
-GET /weather/norway?player=582309742&format=json
 GET /weather/sweden?player=582607705&format=json
+GET /weather/norway?player=582309742&format=json
+GET /weather/poland?player=963988113&format=json
 GET /flights/norway?player=582309742&format=json
-GET /flights/norway?gates=D9&direction=D&format=json
+GET /flights/norway?gates=D9&iata=OSL&direction=D&format=json
 GET /flights/norway?gates=C34,C35&iata=BGO&format=json
-POST /flights/norway/reset
 POST /weather/norway/reset
+POST /flights/norway/reset
 ```

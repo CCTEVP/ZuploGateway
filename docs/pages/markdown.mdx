@@ -7,35 +7,74 @@ category: ""
 
 # Quick Reference
 
+Base URL (deployed): `https://dynode-main-8eca196.zuplo.app`
+
 ## Weather
+
+All weather routes share the same query parameters; only the player dataset
+changes per country.
+
+### Sweden
 
 ```http
 GET /weather/sweden?latlon=59.339,18.067&format=json
 ```
 
 ```http
-GET /weather/norway?player=582309742&format=json
+GET /weather/sweden?player=582607705&format=json
 ```
 
 ```http
-GET /weather/norway?resource_id=582309742&debug=true&format=json
-```
-
-```http
-GET /weather/sweden?latlon=59.339,18.067&filter=false&format=json
+GET /weather/sweden?resource_id=582607705&debug=true&format=json
 ```
 
 ```http
 POST /weather/sweden/reset
 ```
 
+### Norway
+
+```http
+GET /weather/norway?player=582309742&format=json
+```
+
+```http
+GET /weather/norway?com.broadsign.suite.bsp.resource_id=582309742&format=json
+```
+
 ```http
 POST /weather/norway/reset
 ```
 
+### Poland
+
+```http
+GET /weather/poland?player=963988113&format=json
+```
+
+```http
+GET /weather/poland?latlon=52.237,20.979&format=json
+```
+
+```http
+POST /weather/poland/reset
+```
+
+### Weather parameters
+
+| Parameter | Required | Description |
+| --- | --- | --- |
+| `latlon` | One of latlon or player | `latitude,longitude` |
+| `player` | One of latlon or player | Player ID from country dataset |
+| `resource_id` | Alias | Same as `player` |
+| `com.broadsign.suite.bsp.resource_id` | Alias | Legacy CMS parameter |
+| `format=json` | No | JSON response (default is JavaScript) |
+| `filter=false` | No | Disable default field allowlist |
+| `debug=true` | No | Include masked upstream URL + player |
+
 ## Flights Norway
 
-Player lookup:
+### Player lookup
 
 ```http
 GET /flights/norway?player=582309742&format=json
@@ -49,19 +88,52 @@ GET /flights/norway?player=759244535&direction=D&format=json
 GET /flights/norway?resource_id=582309742&format=json
 ```
 
-Direct lookup (`gates` + optional `iata`):
+### Direct lookup (`gates` + optional `iata`)
+
+Single gate:
 
 ```http
 GET /flights/norway?gates=D1&iata=OSL&direction=D&format=json
 ```
 
+Multiple gates (comma-separated):
+
 ```http
 GET /flights/norway?gates=C34,C35&iata=BGO&format=json
 ```
 
+All gates at an airport:
+
+```http
+GET /flights/norway?gates=*&iata=OSL&format=json
+```
+
+Legacy `gate` alias (same as `gates`):
+
+```http
+GET /flights/norway?gate=D9&iata=OSL&format=json
+```
+
+Cache reset:
+
 ```http
 POST /flights/norway/reset
 ```
+
+### Flights parameters
+
+| Parameter | Required | Description |
+| --- | --- | --- |
+| `gates` | One of gates or player | Gate filter(s); comma-separated, dot notation, or `*`. Legacy alias: `gate`. |
+| `iata` | No (direct mode) | Airport code; default `OSL`. Alias: `airport`. |
+| `player` | One of gates or player | Norway player lookup |
+| `resource_id` | Alias | Same as `player` |
+| `direction` | No | `AD` (default), `A`, or `D` |
+| `format=json` | No | JSON response |
+| `filter=false` | No | Disable default field allowlist |
+| `debug=true` | No | Include upstream Avinor metadata |
+
+`gates` and `player` / `resource_id` are **mutually exclusive**.
 
 ## Response format
 
@@ -77,30 +149,54 @@ With `format=json`:
 { "timestamp": "...", "...": "..." }
 ```
 
+### Weather success (filtered) fields
+
+- `coord`
+- `main.temp`
+- `weather[0].main`
+- `wind.speed`
+- `rain.1h`
+
 ### Flights success (filtered) fields
 
 - `iata` / `airportCode`
 - `direction`
-- `gates`
+- `gates` — applied gate filter (string, array, or `*`)
 - `flights[]` — includes `flightId`, `airline`, `scheduleTime`, `airport`,
   `airportName`, `gate`, `beltNumber`, `status`, `delayed`, …
 - `attribution`
 - `timestamp`
 
-### Common errors
+## Common errors
+
+### Weather
 
 | Status | When |
 | --- | --- |
-| 400 | Missing params, `gates`+`player` together, invalid gates, player has no gate, invalid direction/format |
+| 400 | Missing `latlon` and player params; invalid `format` |
 | 404 | Unknown player id |
+
+### Flights
+
+| Status | Error code | When |
+| --- | --- | --- |
+| 400 | `missing_required_parameter` | Neither `gates` nor player provided |
+| 400 | `gate_and_player_conflict` | `gates` and player together |
+| 400 | `invalid_gate` | Unparseable `gates` value |
+| 400 | `invalid_direction` | Direction not `A`, `D`, or `AD` |
+| 400 | `player_has_no_gate` | Player record has no gate configuration |
+| 404 | `unknown_player` | Player id not in Norway dataset |
 
 ## Sample client
 
-The **1080×1920** board is at `/samples/v1/index.html` in the docs portal.
+The **1080×1920** board is at `/samples/v1/index.html` in this portal.
 It calls the live gateway and forwards `player`, `resource_id`, `gates`, and
-`iata` from the page URL, for example:
+`iata` from the page URL:
 
 ```text
 /samples/v1/index.html?resource_id=759244535&direction=D
 /samples/v1/index.html?gates=D9&iata=OSL&direction=D
 ```
+
+Optional page parameters: `direction`, `refresh` (poll interval in seconds),
+`api` (override gateway base URL).

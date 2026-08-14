@@ -77,6 +77,16 @@
               "enum": ["json"]
             },
             "description": "Optional response format. By default returns JavaScript as data = {...};. Use format=json to return raw JSON."
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["false"]
+            },
+            "description": "When set to false, bypasses the default response field allowlist and returns the full upstream payload."
           }
         ],
         "responses": {
@@ -172,6 +182,16 @@
               "enum": ["json"]
             },
             "description": "Optional response format. By default returns JavaScript as data = {...};. Use format=json to return raw JSON."
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["false"]
+            },
+            "description": "When set to false, bypasses the default response field allowlist and returns the full upstream payload."
           }
         ],
         "responses": {
@@ -267,6 +287,16 @@
               "enum": ["json"]
             },
             "description": "Optional response format. By default returns JavaScript as data = {...};. Use format=json to return raw JSON."
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["false"]
+            },
+            "description": "When set to false, bypasses the default response field allowlist and returns the full upstream payload."
           }
         ],
         "responses": {
@@ -390,6 +420,16 @@
               "enum": ["json"]
             },
             "description": "Optional response format. By default returns JavaScript as data = {...};. Use format=json to return raw JSON."
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["false"]
+            },
+            "description": "When set to false, bypasses the default response field allowlist and returns the full upstream payload."
           }
         ],
         "responses": {
