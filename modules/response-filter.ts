@@ -1,6 +1,14 @@
 const responseFilterConfig = {
   weather: {
-    show: ["coord", "main.temp", "weather[0].main", "wind.speed", "rain.1h"],
+    show: [
+      "coord",
+      "main.temp",
+      "weather[0].main",
+      "wind.speed",
+      "rain.1h",
+      "sys.sunrise",
+      "sys.sunset",
+    ],
     hide: [],
   },
   flights: {

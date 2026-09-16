@@ -94,6 +94,7 @@ data (airport/airline names, statuses) need not be polled more than daily.
 | `modules/players/sweden.ts` | Sweden weather players |
 | `modules/players/norway.ts` | Norway weather + flights players |
 | `modules/players/poland.ts` | Poland weather players |
+| `modules/players/poland.csv` | Source CSV for Poland weather players |
 | `modules/players/test.ts` | Shared QA players merged into all country lookups |
 | `modules/players/types.ts` | Types, `parseGates`, `createCountryPlayerLookup` |
 | `modules/players/NorwayPlayers.csv` | Source CSV for Norway flight players |
@@ -138,6 +139,7 @@ Supported flights query modes from signage URLs:
 | `start-dev.ps1` | Free ports 9000/9100 then start dev (Windows) |
 | `.vscode/launch.json` | Debug via Zuplo CLI |
 | `node scripts/update-norway-from-csv.mjs` | Regenerate Norway player dataset |
+| `node scripts/update-poland-from-csv.mjs` | Regenerate Poland player dataset |
 
 ## 9. Scaling / future countries
 

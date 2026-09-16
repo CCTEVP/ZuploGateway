@@ -33,7 +33,7 @@ in [INFRASTRUCTURE.md](INFRASTRUCTURE.md).
 | W-3 | Round coordinates to 3 decimal places before upstream call. |
 | W-4 | Upstream: OpenWeather current weather (`units=metric`). |
 | W-5 | Require `OPENWEATHER_API_KEY`; fail closed if missing. |
-| W-6 | Default response filter (temp, weather main, wind, rain, coord); bypass with `filter=false`. |
+| W-6 | Default response filter (temp, weather main, wind, rain, coord, sunrise, sunset); bypass with `filter=false`. |
 | W-7 | Default body `data = {...};`; `format=json` for JSON. |
 | W-8 | `debug=true` includes masked upstream URL and matched player when applicable. |
 | W-9 | Cache successful HTTP 200 responses for **3600s**; reset via `POST /weather/{country}/reset`. |

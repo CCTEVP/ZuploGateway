@@ -12,10 +12,10 @@ export type PlayerSourceRecord = {
   DisplayUnitsID?: number;
   DisplayUnitID?: number;
   FrameID?: number;
-  PanelsID?: number;
+  PanelID?: number;
   IDSFaceID?: number;
   Country?: string;
-  Municipality?: string;
+  City?: string;
   NameStreet?: string;
   Address?: string;
 };

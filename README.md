@@ -77,7 +77,7 @@ Country files under `modules/players/`:
 | --- | --- | --- |
 | `sweden.ts` | `/weather/sweden` | 13 |
 | `norway.ts` | `/weather/norway`, `/flights/norway` | 48 |
-| `poland.ts` | `/weather/poland` | 252 |
+| `poland.ts` | `/weather/poland` | 867 |
 | `test.ts` | Merged into **every** country lookup | 2 |
 
 Shared helper: `createCountryPlayerLookup(countryRecords, testPlayerRecords)`.
@@ -87,6 +87,13 @@ regenerated with:
 
 ```bash
 node scripts/update-norway-from-csv.mjs
+```
+
+Poland weather players are sourced from `modules/players/poland.csv` and
+regenerated with:
+
+```bash
+node scripts/update-poland-from-csv.mjs
 ```
 
 Optional player fields (flights):
@@ -131,7 +138,7 @@ Requires one of `latlon` or a player id.
 Default body is JavaScript: `data = {...};`.
 
 Default filtered fields: `coord`, `main.temp`, `weather[0].main`, `wind.speed`,
-`rain.1h`.
+`rain.1h`, `sys.sunrise`, `sys.sunset`.
 
 ## Flights Norway
 
@@ -213,6 +220,7 @@ modules/avinor-xml.ts       Avinor feed + airport names
 modules/flights-query-params.ts  gates/iata query helpers
 modules/players/            Country + test player data
 scripts/update-norway-from-csv.mjs  Regenerate norway.ts from CSV
+scripts/update-poland-from-csv.mjs  Regenerate poland.ts from CSV
 samples/v1/                 Signage sample
 docs/                       Zudoku developer portal
 zuplo.jsonc                 Zuplo project metadata
