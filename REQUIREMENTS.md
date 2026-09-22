@@ -30,6 +30,7 @@ in [INFRASTRUCTURE.md](INFRASTRUCTURE.md).
 | --- | --- |
 | W-1 | Country routes: `/weather/sweden`, `/weather/norway`, `/weather/poland` (extensible per country). |
 | W-2 | Resolve location from `latlon` **or** player id. |
+| W-2a | Optional `source=latlon` (default) or `source=city`. City uses player `City`+`Country` for OpenWeather `q`; falls back to lat/lon if City missing; city overrides latlon when both available. |
 | W-3 | Round coordinates to 3 decimal places before upstream call. |
 | W-4 | Upstream: OpenWeather current weather (`units=metric`). |
 | W-5 | Require `OPENWEATHER_API_KEY`; fail closed if missing. |

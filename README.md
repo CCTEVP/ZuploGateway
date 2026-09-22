@@ -131,6 +131,7 @@ Requires one of `latlon` or a player id.
 | --- | --- |
 | `latlon` | Comma-separated coordinates (rounded to 3 decimals upstream) |
 | `player` / `resource_id` | Resolved from the country dataset |
+| `source` | `latlon` (default) or `city`. With `city`, uses player `City` + `Country` for OpenWeather `q=City,CC`; falls back to coordinates if City is missing. City overrides latlon when both are available. |
 | `format=json` | Raw JSON instead of default JavaScript |
 | `filter=false` | Full OpenWeather payload |
 | `debug=true` | Masked upstream URL + matched player |
@@ -177,6 +178,7 @@ GET /flights/norway?iata=BGO&format=json
 GET /weather/norway?player=582309742&format=json
 GET /weather/sweden?player=582607705&format=json
 GET /weather/poland?player=963988113&format=json
+GET /weather/poland?player=963988113&source=city&format=json
 ```
 
 ## Sample client (`samples/v1`)

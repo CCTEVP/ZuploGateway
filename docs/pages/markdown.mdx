@@ -53,6 +53,10 @@ GET /weather/poland?player=963988113&format=json
 ```
 
 ```http
+GET /weather/poland?player=963988113&source=city&format=json
+```
+
+```http
 GET /weather/poland?latlon=52.237,20.979&format=json
 ```
 
@@ -68,6 +72,7 @@ POST /weather/poland/reset
 | `player` | One of latlon or player | Player ID from country dataset |
 | `resource_id` | Alias | Same as `player` |
 | `com.broadsign.suite.bsp.resource_id` | Alias | Legacy CMS parameter |
+| `source` | No | `latlon` (default) or `city`. City uses player `City`+`Country` (`q=Warszawa,PL`); falls back to latlon if City missing. |
 | `format=json` | No | JSON response (default is JavaScript) |
 | `filter=false` | No | Disable default field allowlist |
 | `debug=true` | No | Include masked upstream URL + player |

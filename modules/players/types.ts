@@ -24,6 +24,8 @@ export type PlayerRecord = {
   playerId: string;
   latitude: number;
   longitude: number;
+  city?: string;
+  country?: string;
   /** Normalized gate list. Empty when `allGates` is true. */
   gates?: string[];
   /** When true, flights are not filtered to a specific gate. */
@@ -101,11 +103,15 @@ export function createPlayerLookup(
 
     const { gates, allGates } = parseGates(record.Gate);
     const iata = record.IATA?.trim().toUpperCase();
+    const city = record.City?.trim();
+    const country = record.Country?.trim();
 
     return {
       playerId: String(record.PlayerID),
       latitude: record.Latitude,
       longitude: record.Longitude,
+      ...(city ? { city } : {}),
+      ...(country ? { country } : {}),
       ...(allGates ? { allGates: true, gates: [] } : {}),
       ...(gates?.length ? { gates } : {}),
       ...(iata ? { iata } : {}),

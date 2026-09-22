@@ -29,7 +29,7 @@
     "/weather/sweden": {
       "get": {
         "summary": "Sweden weather",
-        "description": "Resolves coordinates from the Sweden player dataset (or latlon) and returns OpenWeather data.",
+        "description": "Resolves location from the Sweden player dataset (or latlon) and returns OpenWeather data. Use `source=city` with a player to query by City+Country instead of coordinates.",
         "parameters": [
           {
             "name": "latlon",
@@ -38,7 +38,7 @@
             "schema": {
               "type": "string"
             },
-            "description": "The raw comma-separated coordinates (e.g., 32.46564,12.8737874). Optional when player is provided."
+            "description": "The raw comma-separated coordinates (e.g., 32.46564,12.8737874). Optional when player is provided. Overridden when source=city and the player has City."
           },
           {
             "name": "player",
@@ -57,6 +57,16 @@
               "type": "string"
             },
             "description": "An alias of player that resolves the same player ID from the dataset."
+          },
+          {
+            "name": "source",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["latlon", "city"]
+            },
+            "description": "Location source for OpenWeather. `latlon` (default) uses Latitude/Longitude. `city` uses the player's City (+ Country ISO code); falls back to latlon if City is missing."
           },
           {
             "name": "debug",
@@ -134,7 +144,7 @@
     "/weather/norway": {
       "get": {
         "summary": "Norway weather",
-        "description": "Resolves coordinates from the Norway player dataset (or latlon) and returns OpenWeather data.",
+        "description": "Resolves location from the Norway player dataset (or latlon) and returns OpenWeather data. Use `source=city` with a player to query by City+Country instead of coordinates.",
         "parameters": [
           {
             "name": "latlon",
@@ -143,7 +153,7 @@
             "schema": {
               "type": "string"
             },
-            "description": "The raw comma-separated coordinates (e.g., 60.1844248,11.0936436). Optional when player is provided."
+            "description": "The raw comma-separated coordinates (e.g., 60.1844248,11.0936436). Optional when player is provided. Overridden when source=city and the player has City."
           },
           {
             "name": "player",
@@ -162,6 +172,16 @@
               "type": "string"
             },
             "description": "An alias of player that resolves the same player ID from the dataset."
+          },
+          {
+            "name": "source",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["latlon", "city"]
+            },
+            "description": "Location source for OpenWeather. `latlon` (default) uses Latitude/Longitude. `city` uses the player's City (+ Country ISO code); falls back to latlon if City is missing."
           },
           {
             "name": "debug",
@@ -239,7 +259,7 @@
     "/weather/poland": {
       "get": {
         "summary": "Poland weather",
-        "description": "Resolves coordinates from the Poland player dataset (or latlon) and returns OpenWeather data.",
+        "description": "Resolves location from the Poland player dataset (or latlon) and returns OpenWeather data. Use `source=city` with a player to query by City+Country instead of coordinates.",
         "parameters": [
           {
             "name": "latlon",
@@ -248,7 +268,7 @@
             "schema": {
               "type": "string"
             },
-            "description": "The raw comma-separated coordinates (e.g., 52.2370415,20.979166). Optional when player is provided."
+            "description": "The raw comma-separated coordinates (e.g., 52.2370415,20.979166). Optional when player is provided. Overridden when source=city and the player has City."
           },
           {
             "name": "player",
@@ -267,6 +287,16 @@
               "type": "string"
             },
             "description": "An alias of player that resolves the same player ID from the dataset."
+          },
+          {
+            "name": "source",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["latlon", "city"]
+            },
+            "description": "Location source for OpenWeather. `latlon` (default) uses Latitude/Longitude. `city` uses the player's City (+ Country ISO code); falls back to latlon if City is missing."
           },
           {
             "name": "debug",

@@ -81,6 +81,7 @@ Resolve location from **`latlon`** or a **player id** (one is required).
 | --- | --- |
 | `latlon` | Comma-separated latitude,longitude (rounded to 3 decimals before upstream call) |
 | `player` / `resource_id` | Resolved from the country-specific player dataset |
+| `source` | `latlon` (default) or `city`. With `city`, uses player `City` + `Country` for OpenWeather; falls back to coordinates if City is missing. City overrides latlon when both are available. |
 | `format=json` | Raw JSON instead of default JavaScript `data = {...};` |
 | `filter=false` | Return full OpenWeather payload instead of the default field allowlist |
 | `debug=true` | Include masked upstream URL and matched player metadata |
@@ -145,6 +146,7 @@ Example:
 GET /weather/sweden?player=582607705&format=json
 GET /weather/norway?player=582309742&format=json
 GET /weather/poland?player=963988113&format=json
+GET /weather/poland?player=963988113&source=city&format=json
 GET /flights/norway?player=582309742&format=json
 GET /flights/norway?gates=D9&iata=OSL&direction=D&format=json
 GET /flights/norway?gates=C34,C35&iata=BGO&format=json
