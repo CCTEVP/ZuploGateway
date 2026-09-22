@@ -29,6 +29,28 @@ Docs portal:
 npm run docs
 ```
 
+### API tests (`tests/`)
+
+Integration tests against a live gateway (local or deployed):
+
+```bash
+# Terminal 1
+npm run dev
+
+# Terminal 2 — full suite
+npx zuplo test --endpoint http://localhost:9000
+
+# Read-only smoke (safe for production)
+npx zuplo test --endpoint https://dynode-main-8eca196.zuplo.app --filter "smoke:"
+```
+
+| File | Coverage |
+| --- | --- |
+| `tests/smoke.test.ts` | Happy-path weather + flights |
+| `tests/weather.test.ts` | All weather countries + param variants (`source`, `format`, aliases, errors) |
+| `tests/flights.test.ts` | Player/direct lookup, directions, gates/iata, errors |
+| `tests/cache-reset.test.ts` | `POST …/reset` (side effects; skip in production smoke) |
+
 If ports `9000` / `9100` are in use on Windows:
 
 ```powershell

@@ -135,7 +135,8 @@ Supported flights query modes from signage URLs:
 | --- | --- |
 | `npm run dev` | Gateway + editor (docs disabled) |
 | `npm run docs` | Docs portal |
-| `npm run test` | `zuplo test` |
+| `npm run test` | `zuplo test` (needs `--endpoint`) |
+| `npx zuplo test --endpoint http://localhost:9000` | Run `tests/*.test.ts` against local gateway |
 | `start-dev.ps1` | Free ports 9000/9100 then start dev (Windows) |
 | `.vscode/launch.json` | Debug via Zuplo CLI |
 | `node scripts/update-norway-from-csv.mjs` | Regenerate Norway player dataset |
