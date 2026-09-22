@@ -1,7 +1,4 @@
-import {
-  createCountryPlayerLookup,
-  type PlayerSourceRecord,
-} from "./types";
+import { createCountryPlayerLookup, type PlayerSourceRecord } from "./types";
 import { testPlayerRecords } from "./test";
 
 const playerRecords: PlayerSourceRecord[] = [
@@ -5711,7 +5708,7 @@ const playerRecords: PlayerSourceRecord[] = [
     Longitude: 20.93214867,
     Country: "Poland",
     City: "Warszawa",
-    NameStreet: "Zgrupowania AK \"Kampinos\"",
+    NameStreet: 'Zgrupowania AK "Kampinos"',
     Address: "15/ Galeria Młociny",
   },
   {
@@ -5722,7 +5719,7 @@ const playerRecords: PlayerSourceRecord[] = [
     Longitude: 20.9322345,
     Country: "Poland",
     City: "Warszawa",
-    NameStreet: "Zgrupowania AK \"Kampinos\"",
+    NameStreet: 'Zgrupowania AK "Kampinos"',
     Address: "15/ Galeria Młociny",
   },
   {
@@ -9531,6 +9528,16 @@ const playerRecords: PlayerSourceRecord[] = [
     Country: "Poland",
     City: "Wrocław",
     NameStreet: "Komandorska 39",
+  },
+  {
+    PlayerID: 1270394425,
+    DisplayUnitID: 911372290,
+    PanelID: 10100,
+    Latitude: 52.2177826,
+    Longitude: 21.0110229,
+    Country: "Poland",
+    City: "Warszawa",
+    NameStreet: "Polna 11",
   },
 ];
 
