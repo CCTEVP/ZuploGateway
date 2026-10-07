@@ -37,6 +37,22 @@ export const testPlayerRecords: PlayerSourceRecord[] = [
     Gate: "D1",
     IATA: "OSL",
   },
+  {
+    PlayerID: 1302044465,
+    DisplayUnitsID: 255,
+    DisplayUnitID: 1102784676,
+    FrameID: 1102784678,
+    PanelID: 151905,
+    IDSFaceID: 42053,
+    Latitude: 40.4332154,
+    Longitude: -3.5558364,
+    Country: "Spain",
+    City: "Coslada",
+    NameStreet: "Fuentemar",
+    Address: "Fuentemar 21",
+    Gate: "D5",
+    IATA: "OSL",
+  },
 ];
 
 export const testPlayers = createPlayerLookup(testPlayerRecords);
