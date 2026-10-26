@@ -4,29 +4,22 @@ const playersDir = new URL("../modules/players/", import.meta.url);
 const csvPath = new URL("poland.csv", playersDir);
 const tsPath = new URL("poland.ts", playersDir);
 
-const CSV_HEADERS = [
-  "PlayerID",
-  "PanelID",
-  "DisplayUnitID",
-  "Latitude",
-  "Longitude",
-  "City",
-  "NameStreet",
-  "Address",
-  "Country",
-];
-
-/** Legacy export column names in the previous poland.csv. */
-const LEGACY_COLUMNS = {
+/**
+ * CSV column → PlayerSourceRecord field.
+ * "Panel Alt ID", "Name", "Location Sub Type" and "Address2" have no matching
+ * field and are dropped.
+ */
+const COLUMNS = {
   playerId: "Broadsign Player ID",
-  panelId: "Panel ID",
   displayUnitId: "Broadsign Display Unit ID",
+  panelId: "Panel ID",
   latitude: "Latitude",
   longitude: "Longitude",
   city: "City",
-  nameStreet: "Name/Street",
-  address: "Address 1",
+  address: "Address1",
 };
+
+const COUNTRY = "Poland";
 
 function parseCsvLine(line) {
   const out = [];
@@ -54,138 +47,71 @@ function parseCsvLine(line) {
   return out;
 }
 
-function parseCsv(text) {
-  const lines = text
-    .replace(/^\uFEFF/, "")
-    .replace(/\r\n/g, "\n")
-    .replace(/\r/g, "\n")
-    .split("\n")
-    .filter((line) => line.length > 0);
-
-  const rawHeader = parseCsvLine(lines[0]).map((value) =>
-    value.replace(/^\uFEFF/, "").trim(),
-  );
-  const headerIndex = Object.fromEntries(
-    rawHeader.map((name, index) => [name, index]),
-  );
-
-  const get = (row, key) => row[headerIndex[key]]?.trim() ?? "";
-
-  const rows = lines.slice(1).map(parseCsvLine).map((row) => ({
-    PlayerID: get(row, LEGACY_COLUMNS.playerId) || get(row, "PlayerID"),
-    PanelID:
-      get(row, LEGACY_COLUMNS.panelId) ||
-      get(row, "PanelID") ||
-      get(row, "PanelsID"),
-    DisplayUnitID:
-      get(row, LEGACY_COLUMNS.displayUnitId) || get(row, "DisplayUnitID"),
-    Latitude: get(row, LEGACY_COLUMNS.latitude) || get(row, "Latitude"),
-    Longitude: get(row, LEGACY_COLUMNS.longitude) || get(row, "Longitude"),
-    City:
-      get(row, LEGACY_COLUMNS.city) ||
-      get(row, "City") ||
-      get(row, "Municipality"),
-    NameStreet: get(row, LEGACY_COLUMNS.nameStreet) || get(row, "NameStreet"),
-    Address: get(row, LEGACY_COLUMNS.address) || get(row, "Address"),
-    Country: get(row, "Country") || "Poland",
-  }));
-
-  return rows.filter((row) => row.PlayerID);
+function toNumber(raw, column, rowNumber) {
+  const value = Number(raw);
+  if (!raw || !Number.isFinite(value)) {
+    throw new Error(`Row ${rowNumber}: "${column}" is not a number (${raw})`);
+  }
+  return raw;
 }
 
-function escapeCsv(value) {
-  const text = String(value ?? "");
-  if (/[",\n\r]/.test(text)) {
-    return `"${text.replace(/"/g, '""')}"`;
-  }
-  return text;
-}
+const lines = fs
+  .readFileSync(csvPath, "utf8")
+  .replace(/^﻿/, "")
+  .replace(/\r\n?/g, "\n")
+  .split("\n")
+  .filter((line) => line.trim().length > 0);
 
-function writeCsv(rows) {
-  const lines = [
-    CSV_HEADERS.join(","),
-    ...rows.map((row) =>
-      CSV_HEADERS.map((header) => escapeCsv(row[header])).join(","),
-    ),
-  ];
-  fs.writeFileSync(csvPath, `${lines.join("\n")}\n`, "utf8");
-}
+const header = parseCsvLine(lines[0]).map((name) => name.trim());
+const index = Object.fromEntries(
+  Object.entries(COLUMNS).map(([key, column]) => {
+    const position = header.indexOf(column);
+    if (position === -1) {
+      throw new Error(`Missing CSV column: ${column}`);
+    }
+    return [key, position];
+  }),
+);
 
-function toNumber(value, field, playerId) {
-  const parsed = Number(value);
-  if (!Number.isFinite(parsed)) {
-    throw new Error(`Invalid ${field} for PlayerID ${playerId}: ${value}`);
-  }
-  return parsed;
-}
-
-function formatRecord(record) {
-  const lines = ["  {", `    PlayerID: ${record.PlayerID},`];
-
-  if (record.DisplayUnitID != null) {
-    lines.push(`    DisplayUnitID: ${record.DisplayUnitID},`);
-  }
-  if (record.PanelID != null) {
-    lines.push(`    PanelID: ${record.PanelID},`);
-  }
-
-  lines.push(`    Latitude: ${record.Latitude},`);
-  lines.push(`    Longitude: ${record.Longitude},`);
-  lines.push(`    Country: ${JSON.stringify(record.Country)},`);
-
-  if (record.City) {
-    lines.push(`    City: ${JSON.stringify(record.City)},`);
-  }
-  if (record.NameStreet) {
-    lines.push(`    NameStreet: ${JSON.stringify(record.NameStreet)},`);
-  }
-  if (record.Address) {
-    lines.push(`    Address: ${JSON.stringify(record.Address)},`);
-  }
-
-  lines.push("  }");
-  return lines.join("\n");
-}
-
-const parsedRows = parseCsv(fs.readFileSync(csvPath, "utf8"));
-writeCsv(parsedRows);
-
-const seen = new Set();
+// One record per CSV row (one row per panel). Player lookup resolves to the
+// first row per PlayerID.
 const records = [];
+let skippedNoPlayer = 0;
 
-for (const row of parsedRows) {
-  const playerId = toNumber(row.PlayerID, "PlayerID", row.PlayerID);
-  if (seen.has(playerId)) {
-    continue;
+lines.slice(1).forEach((line, i) => {
+  const rowNumber = i + 2;
+  const cells = parseCsvLine(line).map((cell) => cell.trim());
+  const playerId = cells[index.playerId];
+
+  // Panels without an assigned Broadsign player cannot be looked up.
+  if (!playerId || playerId === "0") {
+    skippedNoPlayer++;
+    return;
   }
-  seen.add(playerId);
 
-  records.push({
-    PlayerID: playerId,
-    PanelID: row.PanelID
-      ? toNumber(row.PanelID, "PanelID", playerId)
-      : undefined,
-    DisplayUnitID: row.DisplayUnitID
-      ? toNumber(row.DisplayUnitID, "DisplayUnitID", playerId)
-      : undefined,
-    Latitude: toNumber(row.Latitude, "Latitude", playerId),
-    Longitude: toNumber(row.Longitude, "Longitude", playerId),
-    Country: row.Country || "Poland",
-    City: row.City || undefined,
-    NameStreet: row.NameStreet || undefined,
-    Address: row.Address || undefined,
-  });
-}
+  const fields = [
+    `    PlayerID: ${toNumber(playerId, COLUMNS.playerId, rowNumber)},`,
+    `    DisplayUnitID: ${toNumber(cells[index.displayUnitId], COLUMNS.displayUnitId, rowNumber)},`,
+    `    PanelID: ${toNumber(cells[index.panelId], COLUMNS.panelId, rowNumber)},`,
+    `    Latitude: ${toNumber(cells[index.latitude], COLUMNS.latitude, rowNumber)},`,
+    `    Longitude: ${toNumber(cells[index.longitude], COLUMNS.longitude, rowNumber)},`,
+    `    Country: ${JSON.stringify(COUNTRY)},`,
+  ];
+  if (cells[index.city]) {
+    fields.push(`    City: ${JSON.stringify(cells[index.city])},`);
+  }
+  if (cells[index.address]) {
+    fields.push(`    Address: ${JSON.stringify(cells[index.address])},`);
+  }
 
-const body = records.map(formatRecord).join(",\n");
-const output = `import {
-  createCountryPlayerLookup,
-  type PlayerSourceRecord,
-} from "./types";
+  records.push(["  {", ...fields, "  }"].join("\n"));
+});
+
+const output = `import { createCountryPlayerLookup, type PlayerSourceRecord } from "./types";
 import { testPlayerRecords } from "./test";
 
 const playerRecords: PlayerSourceRecord[] = [
-${body},
+${records.join(",\n")},
 ];
 
 export const polandPlayers = createCountryPlayerLookup(
@@ -195,6 +121,5 @@ export const polandPlayers = createCountryPlayerLookup(
 `;
 
 fs.writeFileSync(tsPath, output);
-console.log(
-  `Normalized ${parsedRows.length} CSV rows; wrote ${records.length} unique players to poland.ts`,
-);
+console.log(`Wrote ${records.length} records to poland.ts`);
+console.log(`Skipped ${skippedNoPlayer} rows without a Broadsign Player ID`);
