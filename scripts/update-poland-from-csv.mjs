@@ -19,6 +19,12 @@ const COLUMNS = {
   address: "Address1",
 };
 
+/**
+ * Optional column: ODT planner stop IDs for /transit/poland, separated by
+ * commas or semicolons (see scripts/suggest-poland-stops.mjs).
+ */
+const STOPS_COLUMN = "Stops";
+
 const COUNTRY = "Poland";
 
 function parseCsvLine(line) {
@@ -73,6 +79,8 @@ const index = Object.fromEntries(
   }),
 );
 
+const stopsIndex = header.indexOf(STOPS_COLUMN);
+
 // One record per CSV row (one row per panel). Player lookup resolves to the
 // first row per PlayerID.
 const records = [];
@@ -102,6 +110,12 @@ lines.slice(1).forEach((line, i) => {
   }
   if (cells[index.address]) {
     fields.push(`    Address: ${JSON.stringify(cells[index.address])},`);
+  }
+  const stops = stopsIndex === -1 ? [] : (cells[stopsIndex] ?? "")
+    .split(/[,;\s]+/)
+    .filter(Boolean);
+  if (stops.length) {
+    fields.push(`    Stops: ${JSON.stringify(stops)},`);
   }
 
   records.push(["  {", ...fields, "  }"].join("\n"));

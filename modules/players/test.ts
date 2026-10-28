@@ -20,6 +20,18 @@ export const testPlayerRecords: PlayerSourceRecord[] = [
     Address: "Fuentemar 21",
     Gate: "D9",
     IATA: "OSL",
+    // Kraków Główny, all platforms (ODT planner stop IDs).
+    Stops: [
+      "plk:80416_1_9",
+      "plk:80416_1_11",
+      "plk:80416_2_3",
+      "plk:80416_2_5",
+      "plk:80416_3_1",
+      "plk:80416_3_2",
+      "plk:80416_4_6",
+      "plk:80416_5_10",
+      "plk:80416_5_12",
+    ],
   },
   {
     PlayerID: 582309742,

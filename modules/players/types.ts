@@ -9,6 +9,11 @@ export type PlayerSourceRecord = {
   Gate?: string | string[];
   /** Optional IATA airport code for flights endpoints (e.g. "OSL", "BGO"). */
   IATA?: string;
+  /**
+   * ODT planner stop ID(s) for transit endpoints (`<feed>:<stop_id>`, e.g.
+   * "plk:80416_3_2"). One per platform/pole the player should show.
+   */
+  Stops?: string | string[];
   DisplayUnitsID?: number;
   DisplayUnitID?: number;
   FrameID?: number;
@@ -31,6 +36,8 @@ export type PlayerRecord = {
   /** When true, flights are not filtered to a specific gate. */
   allGates?: boolean;
   iata?: string;
+  /** Normalized ODT stop ID list. */
+  stops?: string[];
 };
 
 export type PlayerLookup = {
@@ -72,6 +79,20 @@ export function parseGates(
   return gates.length ? { gates } : {};
 }
 
+/** Split ODT stop IDs given as a list or a comma/semicolon/space separated string. */
+export function parseStops(value: string | string[] | undefined): string[] {
+  if (value == null) {
+    return [];
+  }
+
+  const stops = (Array.isArray(value) ? value : [value])
+    .flatMap((part) => String(part).split(/[,;\s]+/))
+    .map((part) => part.trim())
+    .filter(Boolean);
+
+  return [...new Set(stops)];
+}
+
 export function mergePlayerRecords(
   countryRecords: PlayerSourceRecord[],
   sharedRecords: PlayerSourceRecord[],
@@ -105,6 +126,7 @@ export function createPlayerLookup(
     const iata = record.IATA?.trim().toUpperCase();
     const city = record.City?.trim();
     const country = record.Country?.trim();
+    const stops = parseStops(record.Stops);
 
     return {
       playerId: String(record.PlayerID),
@@ -115,6 +137,7 @@ export function createPlayerLookup(
       ...(allGates ? { allGates: true, gates: [] } : {}),
       ...(gates?.length ? { gates } : {}),
       ...(iata ? { iata } : {}),
+      ...(stops.length ? { stops } : {}),
     };
   }
 
