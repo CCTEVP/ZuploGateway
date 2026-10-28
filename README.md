@@ -49,6 +49,7 @@ npx zuplo test --endpoint https://dynode-main-8eca196.zuplo.app --filter "smoke:
 | `tests/smoke.test.ts` | Happy-path weather + flights |
 | `tests/weather.test.ts` | All weather countries + param variants (`source`, `format`, aliases, errors) |
 | `tests/flights.test.ts` | Player/direct lookup, directions, gates/iata, errors |
+| `tests/transit.test.ts` | Poland transit: player/direct stops, limit/window, errors |
 | `tests/cache-reset.test.ts` | `POST …/reset` (side effects; skip in production smoke) |
 
 If ports `9000` / `9100` are in use on Windows:
@@ -65,6 +66,7 @@ Copy `env.example` to `.env`:
 | --- | --- | --- |
 | `OPENWEATHER_API_KEY` | `/weather/*` | OpenWeather API key |
 | Flights | `/flights/norway` | No API key (public Avinor XmlFeed) |
+| `ODT_API_KEY` | `/transit/poland` | Optional. ODT planner key (higher rate limits); works without it |
 
 Deployed secrets are set in the Zuplo portal (not only in Git).
 
@@ -100,7 +102,7 @@ Country files under `modules/players/`:
 | `sweden.ts` | `/weather/sweden` | 13 |
 | `norway.ts` | `/weather/norway`, `/flights/norway` | 48 |
 | `poland.ts` | `/weather/poland` | 867 |
-| `test.ts` | Merged into **every** country lookup | 2 |
+| `test.ts` | Merged into **every** country lookup | 5 |
 
 Shared helper: `createCountryPlayerLookup(countryRecords, testPlayerRecords)`.
 
@@ -190,6 +192,55 @@ Reset: `POST /flights/norway/reset`.
 
 Attribution in responses: “Flight data from Avinor” → [avinor.no](https://www.avinor.no).
 
+## Transit Poland
+
+`GET /transit/poland` — next departures (e.g. trains) from the
+[Open Transport Data](https://odt.org.pl/en/developers) journey planner, which
+merges GTFS timetables with GTFS-RT realtime feeds. Cache **30 seconds**.
+
+Two lookup modes — never combine them:
+
+1. **Player** — `player` or `resource_id`, resolved to the player's `Stops`
+2. **Direct** — `stops`: comma-separated ODT stop IDs (`<feed>:<stop_id>`)
+
+| Parameter | Description |
+| --- | --- |
+| `limit` | Departures to return, 1–10 (default 3) |
+| `window` | Look-ahead in minutes, 1–720 (default 120) |
+| `include=terminating` | Also return trips that end at the stop (skipped by default: nobody can board them) |
+| `debug` / `format` / `filter` | Same semantics as weather |
+
+Default response — only what a countdown needs, per departure: `line`,
+`headsign`, `platform`, `arrival`, `departure` (realtime estimate, else
+scheduled), `realtime`, `atPlatform` and `remainingSeconds` (until arrival;
+**0 when the vehicle is already at the platform**). `filter=false` adds the
+scheduled/estimated times, delay, operator, colors, `startsHere`,
+`terminatesHere`, `tripId`, plus `next` and `stops`.
+
+Clients should count down from `arrival`/`departure` on their own clock:
+`remainingSeconds` is computed when the response is built and the response is
+cached for up to 30 s. At the platform = `arrival <= now < departure`.
+
+- "At platform" is inferred from realtime (or scheduled) arrival ≤ now <
+  departure: ODT has no live positions for trains.
+- A train that **starts** at the stop (`startsHere: true`) has no arrival time,
+  so it counts down to departure even if it is already parked.
+- `realtime: false` means the operator publishes no live data for that trip.
+
+Player field: `Stops` (string or string[]) in `PlayerSourceRecord`, e.g.
+`["plk:80416_3_1", "plk:80416_3_2"]` (Kraków Główny platforms 3/1, 3/2).
+Suggest candidates from player coordinates, review them, add them to the
+`Stops` column of `poland.csv`, then regenerate:
+
+```bash
+node scripts/suggest-poland-stops.mjs --modes rail --radius 500
+node scripts/update-poland-from-csv.mjs
+```
+
+Test player `759244535` has all Kraków Główny platforms configured.
+
+Reset: `POST /transit/poland/reset`.
+
 ### Examples
 
 ```bash
@@ -201,6 +252,8 @@ GET /weather/norway?player=582309742&format=json
 GET /weather/sweden?player=582607705&format=json
 GET /weather/poland?player=963988113&format=json
 GET /weather/poland?player=963988113&source=city&format=json
+GET /transit/poland?player=759244535&format=json
+GET /transit/poland?stops=plk:80416_3_1,plk:80416_3_2&limit=5&format=json
 ```
 
 ## Sample client (`samples/v1`)

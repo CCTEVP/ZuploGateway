@@ -2,6 +2,7 @@ import { describe, it } from "@zuplo/test";
 import {
   FIXTURES,
   assertFlightsSuccess,
+  assertTransitSuccess,
   assertWeatherFiltered,
   expectStatus,
   get,
@@ -78,5 +79,16 @@ describe("smoke: flights", () => {
     });
     await expectStatus(response, 200);
     assertFlightsSuccess(await parseBody(response));
+  });
+});
+
+describe("smoke: transit", () => {
+  it("test player returns poland transit departures", async () => {
+    const response = await get("/transit/poland", {
+      player: FIXTURES.testPlayerD9,
+      format: "json",
+    });
+    await expectStatus(response, 200);
+    assertTransitSuccess(await parseBody(response));
   });
 });

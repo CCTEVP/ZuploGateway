@@ -22,6 +22,10 @@ const responseFilterConfig = {
     ],
     hide: [],
   },
+  transit: {
+    show: ["departures", "attribution"],
+    hide: [],
+  },
 };
 
 type PathPart = string | number;

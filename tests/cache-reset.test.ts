@@ -39,4 +39,12 @@ describe("cache reset", () => {
     assert.equal(body.reset, true);
     assert.ok(body.version);
   });
+
+  it("resets poland transit cache", async () => {
+    const response = await post("/transit/poland/reset");
+    await expectStatus(response, 200);
+    const body = await parseBody(response);
+    assert.equal(body.reset, true);
+    assert.ok(body.version);
+  });
 });

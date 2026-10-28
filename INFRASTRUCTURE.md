@@ -37,6 +37,10 @@ Do not commit `.env` / `.env.zuplo` (see `.gitignore`).
 
 Flights use public Avinor HTTP feeds — **no** Avinor API key.
 
+| Optional | Used by | Notes |
+| --- | --- | --- |
+| `ODT_API_KEY` | `/transit/poland` | Sent as `X-API-Key`. Without it ODT limits departures to 120 req/min **per IP**, and Zuplo edge IPs are shared. Request from kontakt@odt.org.pl. |
+
 ## 3. Request pipeline
 
 ```text
@@ -58,6 +62,7 @@ Client
 | Weather Norway | `weather-norway-normalize-cache-key` | `weather-norway-cache-inbound` | 3600s | `POST /weather/norway/reset` |
 | Weather Poland | `weather-poland-normalize-cache-key` | `weather-poland-cache-inbound` | 3600s | `POST /weather/poland/reset` |
 | Flights Norway | `flights-normalize-cache-key` | `flights-cache-inbound` | 180s | `POST /flights/norway/reset` |
+| Transit Poland | `transit-poland-normalize-cache-key` | `transit-poland-cache-inbound` | 30s | `POST /transit/poland/reset` |
 
 Only HTTP **200** responses are cached. Cache invalidation bumps a `ZoneCache`
 version key included in the normalized request URL.
@@ -72,6 +77,7 @@ Flights cache keys normalize direct lookups to canonical `gates`, `iata`, and
 | OpenWeather | HTTPS JSON | Query `appid` | Current weather |
 | Avinor XmlFeed `asrv.avinor.no/XmlFeed/v1.0` | HTTPS XML | None | Flights by airport |
 | Avinor airportNames `asrv.avinor.no/airportNames/v1.0` | HTTPS XML | None | IATA → city/name (`airportName`) |
+| ODT planner `api.odt.org.pl/api/planner/v1` (`/stop/departures/`, `/trip/`) | HTTPS JSON | Optional `X-API-Key` | Poland departures with GTFS-RT estimates; one departures call plus one trip call per returned departure |
 
 Avinor parameter names are **case-sensitive**. Responses are
 `Content-Type: application/xml;charset=iso-8859-1` with XML decl

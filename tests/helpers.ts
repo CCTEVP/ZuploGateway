@@ -13,6 +13,8 @@ export const FIXTURES = {
   testPlayerD1: "582309742",
   oslGate: "D9",
   bgoGates: "C34,C35",
+  /** Kraków Główny platforms 3/1 and 3/2 (ODT planner stop IDs). */
+  krakowStops: "plk:80416_3_1,plk:80416_3_2",
 } as const;
 
 export function baseUrl(): string {
@@ -92,4 +94,33 @@ export function assertFlightsSuccess(body: Record<string, unknown>) {
   assert.ok(Array.isArray(body.flights), "expected flights[]");
   assert.ok(body.attribution, "expected attribution");
   assert.ok(body.timestamp, "expected timestamp");
+}
+
+const COMPACT_TRANSIT_FIELDS = [
+  "arrival",
+  "atPlatform",
+  "departure",
+  "headsign",
+  "line",
+  "platform",
+  "realtime",
+  "remainingSeconds",
+];
+
+/** Default (filtered) transit response: only the countdown fields. */
+export function assertTransitSuccess(body: Record<string, unknown>) {
+  assert.ok(Array.isArray(body.departures), "expected departures[]");
+  assert.ok(body.attribution, "expected attribution");
+  assert.ok(body.timestamp, "expected timestamp");
+  assert.equal(body.next, undefined, "next only with filter=false");
+
+  for (const departure of body.departures as Record<string, unknown>[]) {
+    assert.deepEqual(Object.keys(departure).sort(), COMPACT_TRANSIT_FIELDS);
+    assert.ok(!Number.isNaN(Date.parse(String(departure.arrival))));
+    assert.ok(!Number.isNaN(Date.parse(String(departure.departure))));
+    assert.ok(
+      !departure.atPlatform || departure.remainingSeconds === 0,
+      "atPlatform implies remainingSeconds 0",
+    );
+  }
 }

@@ -3,7 +3,7 @@
   "info": {
     "version": "1.0.0",
     "title": "Dynode Gateway",
-    "description": "Weather (OpenWeather) and Norway flights (Avinor) for players in Sweden, Norway, and Poland."
+    "description": "Weather (OpenWeather), Norway flights (Avinor), and Poland transit departures (ODT) for players in Sweden, Norway, and Poland."
   },
   "paths": {
     "/weather/sweden/reset": {
@@ -482,6 +482,143 @@
           }
         },
         "tags": ["Flights"]
+      }
+    },
+    "/transit/poland/reset": {
+      "post": {
+        "summary": "Reset Poland transit cache",
+        "description": "Invalidates the Poland transit cache by bumping the internal cache version used in transit request cache keys.",
+        "responses": {
+          "200": {
+            "description": "Transit cache reset successfully"
+          }
+        },
+        "operationId": "reset-transit-poland-cache",
+        "x-zuplo-route": {
+          "corsPolicy": "none",
+          "handler": {
+            "export": "default",
+            "module": "$import(./modules/transit-poland-reset)"
+          }
+        },
+        "tags": ["Transit"]
+      }
+    },
+    "/transit/poland": {
+      "get": {
+        "summary": "Poland next departures by stop",
+        "description": "Returns the next public transport departures (e.g. trains) from Open Transport Data (ODT) planner stops, with realtime estimates where the operator publishes GTFS-RT. Two lookup modes: (1) player — `player` or `resource_id` resolved to ODT stop IDs from the Poland dataset (`Stops`); (2) direct — `stops`. Modes are mutually exclusive. Trips that end at the stop are skipped unless `include=terminating`. Each departure includes `arrival` and `departure` (realtime estimate, else scheduled) and `remainingSeconds` until arrival (0 when the vehicle is already at the platform, `atPlatform: true`). Responses are cached for up to 30 seconds, so clients should count down from `arrival`/`departure` rather than `remainingSeconds`.",
+        "parameters": [
+          {
+            "name": "player",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Player lookup: resolved to ODT stop IDs from the Poland player dataset. Mutually exclusive with stops."
+          },
+          {
+            "name": "resource_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Alias of player for player lookup. Mutually exclusive with stops."
+          },
+          {
+            "name": "stops",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Direct lookup: comma-separated ODT stop IDs (`<feed>:<stop_id>`), e.g. plk:80416_3_1,plk:80416_3_2. Mutually exclusive with player/resource_id."
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10
+            },
+            "description": "Number of departures to return. Defaults to 3."
+          },
+          {
+            "name": "window",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 720
+            },
+            "description": "Look-ahead window in minutes. Defaults to 120."
+          },
+          {
+            "name": "include",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["terminating"]
+            },
+            "description": "Departure kinds skipped by default. terminating = also return trips that end at the stop (arrivals only; passengers cannot board)."
+          },
+          {
+            "name": "debug",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["true", "false"]
+            },
+            "description": "Optional debug flag. When set to true, the response includes a debug object with the upstream ODT URL and matched player."
+          },
+          {
+            "name": "format",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["json"]
+            },
+            "description": "Optional response format. By default returns JavaScript as data = {...};. Use format=json to return raw JSON."
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["false"]
+            },
+            "description": "When set to false, returns every departure field (scheduled/estimated times, delay, operator, colors, startsHere/terminatesHere, tripId) plus next and stops. The default response keeps line, headsign, platform, arrival, departure, realtime, atPlatform and remainingSeconds."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A successful transit departures response"
+          }
+        },
+        "operationId": "get-poland-transit",
+        "x-zuplo-route": {
+          "corsPolicy": "none",
+          "policies": {
+            "inbound": [
+              "transit-poland-normalize-cache-key",
+              "transit-poland-cache-inbound"
+            ]
+          },
+          "handler": {
+            "export": "default",
+            "module": "$import(./modules/transit-poland-transform)"
+          }
+        },
+        "tags": ["Transit"]
       }
     }
   }

@@ -82,7 +82,22 @@ Request pipeline: route → normalize cache key (resolves player → canonical
 | F-11 | Cache HTTP 200 for **180 s**; reset via `POST /flights/norway/reset`. | ⚠️ | Partial `AD` results can be cached (see R-1). |
 | F-12 | Same `format` / `filter` / `debug` conventions as weather. | ✅ | |
 
-### 3.4 Sample signage client
+### 3.4 Transit (Poland)
+
+| ID | Requirement | Status | Notes |
+| --- | --- | --- | --- |
+| T-1 | Route `/transit/poland` backed by the ODT journey planner (GTFS + GTFS-RT merged upstream). | ✅ | `modules/odt-planner.ts` |
+| T-2 | Player lookup via `player` / `resource_id` → `Stops` (ODT stop IDs); direct `stops` lookup; modes mutually exclusive (`stops_and_player_conflict`). | ✅ | |
+| T-3 | Return the next departures (`limit` 1–10, default 3; `window` 1–720 min, default 120) sorted by estimated departure; drop canceled, already-departed and terminating trips (`include=terminating` keeps the latter). | ✅ | |
+| T-3a | Default response carries only countdown fields (`line`, `headsign`, `platform`, `arrival`, `departure`, `realtime`, `atPlatform`, `remainingSeconds`); `filter=false` returns all fields. | ✅ | Clients count down from `arrival`/`departure` because responses are cached up to 30 s. |
+| T-4 | `remainingSeconds` until arrival at the platform; **0 when the vehicle is at the platform** (`atPlatform`). | ⚠️ | Inferred from arrival ≤ now < departure (no rail vehicle positions in ODT). Trains starting at the stop (`startsHere`) cannot be detected as parked. |
+| T-5 | Expose `realtime` flag and scheduled vs estimated times so screens can show "scheduled". | ✅ | Realtime coverage varies by operator. |
+| T-6 | Upstream failures return standard errors (`invalid_stop` 400, `upstream_rate_limited` 503, `upstream_error` 502/504) and are not cached. | ✅ | 8 s timeout. |
+| T-7 | Cache HTTP 200 for **30 s**, keyed by sorted stop set; reset via `POST /transit/poland/reset`. | ⚠️ | Not verifiable locally (local dev does not cache); verify after deploy. |
+| T-8 | Optional `ODT_API_KEY` secret sent as `X-API-Key`. | ⚠️ | Key requested from ODT; required in production because Zuplo egress IPs are shared. |
+| T-9 | Stop IDs maintained in `poland.csv` (`Stops` column) with a suggestion script from player coordinates. | ✅ | `scripts/suggest-poland-stops.mjs`; human review required. |
+
+### 3.5 Sample signage client
 
 | ID | Requirement | Status | Notes |
 | --- | --- | --- | --- |

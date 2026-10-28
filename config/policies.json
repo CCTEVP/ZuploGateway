@@ -85,6 +85,27 @@
       }
     },
     {
+      "name": "transit-poland-normalize-cache-key",
+      "policyType": "custom-code-inbound",
+      "handler": {
+        "export": "default",
+        "module": "$import(./modules/transit-poland-normalize-cache-key)",
+        "options": {}
+      }
+    },
+    {
+      "name": "transit-poland-cache-inbound",
+      "policyType": "caching-inbound",
+      "handler": {
+        "export": "CachingInboundPolicy",
+        "module": "$import(@zuplo/runtime)",
+        "options": {
+          "expirationSecondsTtl": 30,
+          "statusCodes": [200]
+        }
+      }
+    },
+    {
       "handler": {
         "export": "MockApiInboundPolicy",
         "module": "$import(@zuplo/runtime)",
