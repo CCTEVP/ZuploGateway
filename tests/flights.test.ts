@@ -99,6 +99,16 @@ describe("flights /flights/norway", () => {
     assertFlightsSuccess(body);
   });
 
+  it("accepts com.driver.drv.station_id", async () => {
+    const response = await get(PATH, {
+      "com.driver.drv.station_id": FIXTURES.testPlayerD9,
+      format: "json",
+    });
+    await expectStatus(response, 200);
+    const body = await parseBody(response);
+    assertFlightsSuccess(body);
+  });
+
   it("accepts direction=A", async () => {
     const response = await get(PATH, {
       player: FIXTURES.testPlayerD9,

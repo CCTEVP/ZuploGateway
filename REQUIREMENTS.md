@@ -42,7 +42,7 @@ Request pipeline: route → normalize cache key (resolves player → canonical
 
 | ID | Requirement | Status | Notes |
 | --- | --- | --- | --- |
-| P-1 | Accept player id via `player`, `resource_id`, or legacy `com.broadsign.suite.bsp.resource_id` (precedence in that order). | ✅ | `modules/player-query-params.ts` |
+| P-1 | Accept player id via `player`, `resource_id`, legacy `com.broadsign.suite.bsp.resource_id`, or `com.driver.drv.station_id` (precedence in that order). | ✅ | `modules/player-query-params.ts` |
 | P-2 | Player datasets are **country-scoped** (`sweden`, `norway`, `poland`). | ✅ | `modules/players/{country}.ts` |
 | P-3 | Shared test/demo players (`modules/players/test.ts`) are merged into every country lookup; country records win on ID collision. | ✅ | `mergePlayerRecords`. Currently **3** test players (759244535 D9, 582309742 D1, 1302044465 D5 — all OSL, located in Coslada, ES). |
 | P-4 | Flights players may include optional `Gate` (single, comma list, dot notation `C2.C3`, `*`, or "General all gates") and `IATA`. | ✅ | `parseGates` in `players/types.ts` |

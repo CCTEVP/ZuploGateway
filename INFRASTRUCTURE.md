@@ -122,7 +122,7 @@ without CORS.
 
 Supported flights query modes from signage URLs:
 
-- Player: `player`, `resource_id`, or legacy `com.broadsign.suite.bsp.resource_id`
+- Player: `player`, `resource_id`, legacy `com.broadsign.suite.bsp.resource_id`, or `com.driver.drv.station_id`
 - Direct: `gates` (+ optional `iata`), `iata` alone (all gates), or legacy alias `gate`
 
 ## 7. Developer portal

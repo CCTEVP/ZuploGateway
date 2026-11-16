@@ -11,7 +11,7 @@ export type PlayerSourceRecord = {
   IATA?: string;
   /**
    * ODT planner stop ID(s) for transit endpoints (`<feed>:<stop_id>`, e.g.
-   * "plk:80416_3_2"). One per platform/pole the player should show.
+   * "plk:80416_RAIL_3_2"). One per platform/pole the player should show.
    */
   Stops?: string | string[];
   DisplayUnitsID?: number;

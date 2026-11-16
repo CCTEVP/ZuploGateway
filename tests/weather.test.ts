@@ -101,6 +101,16 @@ for (const country of WEATHER_COUNTRIES) {
       assertWeatherFiltered(body);
     });
 
+    it("accepts com.driver.drv.station_id", async () => {
+      const response = await get(country.path, {
+        "com.driver.drv.station_id": country.player,
+        format: "json",
+      });
+      await expectStatus(response, 200);
+      const body = await parseBody(response);
+      assertWeatherFiltered(body);
+    });
+
     it("accepts latlon lookup", async () => {
       const response = await get(country.path, {
         latlon: country.latlon,

@@ -534,7 +534,7 @@
             "schema": {
               "type": "string"
             },
-            "description": "Direct lookup: comma-separated ODT stop IDs (`<feed>:<stop_id>`), e.g. plk:80416_3_1,plk:80416_3_2. Mutually exclusive with player/resource_id."
+            "description": "Direct lookup: comma-separated ODT stop IDs (`<feed>:<stop_id>`), e.g. plk:80416_RAIL_3_1,plk:80416_RAIL_3_2. Mutually exclusive with player/resource_id."
           },
           {
             "name": "limit",

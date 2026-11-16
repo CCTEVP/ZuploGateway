@@ -8,6 +8,9 @@ export const RESOURCE_ID_ALIAS_QUERY_PARAM = "resource_id";
 export const RESOURCE_ID_QUERY_PARAM =
   "com.broadsign.suite.bsp.resource_id";
 
+/** CMS station id parameter (external contract), same as resource id. */
+export const STATION_ID_QUERY_PARAM = "com.driver.drv.station_id";
+
 export function getPlayerLookupValue(
   searchParams: URLSearchParams,
 ): string | undefined {
@@ -16,11 +19,13 @@ export function getPlayerLookupValue(
     .get(RESOURCE_ID_ALIAS_QUERY_PARAM)
     ?.trim();
   const resourceId = searchParams.get(RESOURCE_ID_QUERY_PARAM)?.trim();
-  return player || resourceIdAlias || resourceId || undefined;
+  const stationId = searchParams.get(STATION_ID_QUERY_PARAM)?.trim();
+  return player || resourceIdAlias || resourceId || stationId || undefined;
 }
 
 export function clearPlayerLookupParams(searchParams: URLSearchParams) {
   searchParams.delete(PLAYER_QUERY_PARAM);
   searchParams.delete(RESOURCE_ID_ALIAS_QUERY_PARAM);
   searchParams.delete(RESOURCE_ID_QUERY_PARAM);
+  searchParams.delete(STATION_ID_QUERY_PARAM);
 }

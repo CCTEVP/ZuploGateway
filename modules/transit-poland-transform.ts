@@ -48,7 +48,7 @@ export default async function (request: ZuploRequest, context: ZuploContext) {
       format,
       error: "missing_required_parameter",
       message:
-        "Missing required query parameter: provide player/resource_id or stops. Example: ?player=963988113 or ?stops=plk:80416_3_2.",
+        "Missing required query parameter: provide player/resource_id or stops. Example: ?player=963988113 or ?stops=plk:80416_RAIL_3_2.",
     });
   }
 

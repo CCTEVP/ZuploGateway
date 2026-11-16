@@ -102,10 +102,16 @@ async function odtGet<T>(
   }
 
   if (!response.ok) {
+    // Malformed stop IDs come back as 400 and unknown ones as 404 with
+    // code planner.stop_not_found; both are client errors.
+    const code =
+      response.status === 404
+        ? ((await response.json().catch(() => null)) as { code?: string } | null)
+            ?.code
+        : undefined;
     throw new OdtUpstreamError(
       `ODT planner returned ${response.status} for ${path}`,
-      // Invalid stop IDs come back as 400 from the planner.
-      response.status === 400 ? 400 : 502,
+      response.status === 400 || code === "planner.stop_not_found" ? 400 : 502,
     );
   }
 

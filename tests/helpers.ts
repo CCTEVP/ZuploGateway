@@ -14,7 +14,7 @@ export const FIXTURES = {
   oslGate: "D9",
   bgoGates: "C34,C35",
   /** Kraków Główny platforms 3/1 and 3/2 (ODT planner stop IDs). */
-  krakowStops: "plk:80416_3_1,plk:80416_3_2",
+  krakowStops: "plk:80416_RAIL_3_1,plk:80416_RAIL_3_2",
 } as const;
 
 export function baseUrl(): string {

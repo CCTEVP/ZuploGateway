@@ -81,6 +81,16 @@ describe("transit /transit/poland", () => {
     assert.equal(body.error, "invalid_stop");
   });
 
+  it("returns invalid_stop for a well-formed but unknown stop ID", async () => {
+    const response = await get(PATH, {
+      stops: "plk:00000_RAIL_0_0",
+      format: "json",
+    });
+    await expectStatus(response, 400);
+    const body = await parseBody(response);
+    assert.equal(body.error, "invalid_stop");
+  });
+
   it("returns 400 for invalid include", async () => {
     const response = await get(PATH, {
       stops: FIXTURES.krakowStops,
@@ -145,6 +155,15 @@ describe("transit /transit/poland", () => {
   it("accepts resource_id alias", async () => {
     const response = await get(PATH, {
       resource_id: FIXTURES.testPlayerD9,
+      format: "json",
+    });
+    await expectStatus(response, 200);
+    assertTransitSuccess(await parseBody(response));
+  });
+
+  it("accepts com.driver.drv.station_id alias", async () => {
+    const response = await get(PATH, {
+      "com.driver.drv.station_id": FIXTURES.testPlayerD9,
       format: "json",
     });
     await expectStatus(response, 200);

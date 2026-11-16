@@ -132,11 +132,12 @@ Demo/QA player IDs (always available):
 | `759244535` | D9 | OSL |
 | `582309742` | D1 | OSL |
 
-Player id query aliases (weather + flights):
+Player id query aliases (weather, flights and transit):
 
 - `player`
 - `resource_id`
 - `com.broadsign.suite.bsp.resource_id` (legacy CMS contract)
+- `com.driver.drv.station_id` (CMS contract, same as above)
 
 ## Weather
 
@@ -228,7 +229,7 @@ cached for up to 30 s. At the platform = `arrival <= now < departure`.
 - `realtime: false` means the operator publishes no live data for that trip.
 
 Player field: `Stops` (string or string[]) in `PlayerSourceRecord`, e.g.
-`["plk:80416_3_1", "plk:80416_3_2"]` (Kraków Główny platforms 3/1, 3/2).
+`["plk:80416_RAIL_3_1", "plk:80416_RAIL_3_2"]` (Kraków Główny platforms 3/1, 3/2).
 Suggest candidates from player coordinates, review them, add them to the
 `Stops` column of `poland.csv`, then regenerate:
 
@@ -253,7 +254,7 @@ GET /weather/sweden?player=582607705&format=json
 GET /weather/poland?player=963988113&format=json
 GET /weather/poland?player=963988113&source=city&format=json
 GET /transit/poland?player=759244535&format=json
-GET /transit/poland?stops=plk:80416_3_1,plk:80416_3_2&limit=5&format=json
+GET /transit/poland?stops=plk:80416_RAIL_3_1,plk:80416_RAIL_3_2&limit=5&format=json
 ```
 
 ## Sample client (`samples/v1`)
